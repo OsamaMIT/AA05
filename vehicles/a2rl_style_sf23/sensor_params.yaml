@@ -1,0 +1,17 @@
+public_sensor_suite:
+  cameras:
+    model: Sony IMX728
+    count: 7
+    coverage: 360 degree
+  radars:
+    model: ZF ProWave
+    count: 4
+  lidars:
+    model: Seyond Falcon Kinetic FK1
+    count: 3
+  high_level_computer:
+    model: Neousys RGS-8805GC
+public_source: https://a2rl.io/autonomous-car-race
+simulation_use:
+  enabled_in_mvp: false
+  notes: Sensors are documented for future perception and ROS work; the current training stack uses direct ground-truth state.

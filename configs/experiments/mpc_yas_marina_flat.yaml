@@ -1,0 +1,27 @@
+name: mpc_yas_marina_flat
+description: MPC baseline on flat Yas Marina data, falling back to a synthetic oval when data is absent.
+component_configs:
+  vehicle: configs/vehicle/a2rl_style_sf23.yaml
+  track: configs/track/yas_marina.yaml
+  controller:
+    lateral: configs/controller/mpc_lateral.yaml
+    speed: configs/controller/speed_pid.yaml
+  simulation: configs/simulation/chrono_default.yaml
+
+simulation:
+  max_episode_time: 600.0
+
+speed_profile:
+  min_speed: 5.0
+  max_speed: 15.0
+  max_lateral_accel: 3.5
+  smoothing_window: 21
+
+logging:
+  log_dir: logs
+  save_csv: true
+
+termination:
+  complete_lap_fraction: 0.98
+  stop_on_offtrack: true
+  stop_on_instability: true

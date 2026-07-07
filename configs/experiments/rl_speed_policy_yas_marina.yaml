@@ -1,0 +1,23 @@
+name: rl_speed_policy_yas_marina
+description: PPO high-level speed scaling policy above the MPC baseline.
+component_configs:
+  vehicle: configs/vehicle/a2rl_style_sf23.yaml
+  track: configs/track/yas_marina.yaml
+  controller:
+    lateral: configs/controller/mpc_lateral.yaml
+    speed: configs/controller/speed_pid.yaml
+  simulation: configs/simulation/chrono_default.yaml
+  rl: configs/rl/ppo_speed_policy.yaml
+
+speed_profile:
+  min_speed: 5.0
+  max_speed: 15.0
+  max_lateral_accel: 3.5
+  smoothing_window: 21
+
+reward:
+  progress_weight: 1.0
+  offtrack_penalty: 25.0
+  curb_penalty_scale: 1.0
+  instability_penalty: 10.0
+  excessive_control_penalty: 0.05

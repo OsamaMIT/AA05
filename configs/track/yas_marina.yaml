@@ -1,0 +1,17 @@
+name: yas_marina
+source: TUMFTM/racetrack-database
+track_dir: tracks/yas_marina
+csv_path: tracks/yas_marina/processed/yas_marina.csv
+raceline_path: tracks/yas_marina/processed/yas_marina_raceline.csv
+metadata_path: tracks/yas_marina/processed/yas_marina_metadata.yaml
+curbs_path: tracks/yas_marina/curbs.yaml
+use_raceline_if_available: true
+fallback:
+  enabled: true
+  type: synthetic_oval
+  name: synthetic_yas_marina_fallback
+  num_points: 600
+  radius_x: 80.0
+  radius_y: 52.0
+  width_left: 8.0
+  width_right: 8.0

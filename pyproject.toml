@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "chrono-a2rl-training"
+version = "0.1.0"
+description = "A modular A2RL-style autonomous racing training stack using Project Chrono, MPC, and Gymnasium."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "pandas>=2.0",
+  "pyyaml>=6.0",
+  "matplotlib>=3.7",
+  "gymnasium>=0.29",
+]
+
+[project.optional-dependencies]
+mpc = ["osqp>=0.6"]
+rl = ["stable-baselines3>=2.0", "tensorboard>=2.12"]
+dev = ["pytest>=7.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-p no:launch_testing -p no:launch_ros"

@@ -1,0 +1,11 @@
+public_actuation_notes:
+  - A2RL EAV-25 material mentions steering-system upgrades.
+  - A2RL brake specs list electro-hydraulic activation.
+  - Exact actuator dynamics are not public.
+max_steer: 0.38
+max_steer_rate: 1.5
+steering_time_constant: 0.06
+throttle_time_constant: 0.10
+brake_time_constant: 0.07
+command_interface: drive_by_wire
+notes: DBW response values are conservative placeholders for controller development.

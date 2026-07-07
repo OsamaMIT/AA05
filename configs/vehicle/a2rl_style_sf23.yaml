@@ -1,0 +1,41 @@
+name: a2rl_eav25_style
+description: Public-reference A2RL EAV24/EAV25-style autonomous Super Formula vehicle profile.
+params_path: vehicles/a2rl_style_sf23/vehicle_params.yaml
+aero_path: vehicles/a2rl_style_sf23/aero_params.yaml
+tire_path: vehicles/a2rl_style_sf23/tire_params.yaml
+brake_path: vehicles/a2rl_style_sf23/brake_params.yaml
+powertrain_path: vehicles/a2rl_style_sf23/powertrain_params.yaml
+actuator_path: vehicles/a2rl_style_sf23/actuator_params.yaml
+sensor_path: vehicles/a2rl_style_sf23/sensor_params.yaml
+
+public_reference:
+  series: Abu Dhabi Autonomous Racing League
+  model_family: Dallara EAV24 / EAV25
+  base_platform: Dallara Super Formula car
+  season_2_model: EAV-25
+  source_urls:
+    - https://a2rl.io/autonomous-car-race
+  notes:
+    - A2RL lists EAV-24 as the Dallara autonomous Super Formula racecar platform.
+    - A2RL lists EAV-25 as the Season 2 upgraded version with reliability, safety, and powertrain improvements.
+    - Exact mass, inertia, tire curves, aero maps, and actuator limits are not public; simulation values below are conservative placeholders.
+
+# Simulation estimates. These are not private A2RL parameters.
+mass: 795.0
+wheelbase: 3.115
+front_axle_to_cg: 1.56
+rear_axle_to_cg: 1.555
+body_length: 5.23
+body_width: 1.91
+body_height: 0.96
+track_width_front: 1.62
+track_width_rear: 1.58
+max_steer: 0.38
+max_steer_rate: 1.5
+max_speed: 82.0
+max_throttle: 1.0
+max_brake: 1.0
+max_accel: 5.5
+max_decel: 12.0
+drag_coefficient: 0.020
+rolling_resistance: 0.08

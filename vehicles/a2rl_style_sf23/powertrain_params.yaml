@@ -1,0 +1,18 @@
+public_engine:
+  builder: 4 Piston Racing
+  base_engine: Honda K20C1
+  displacement_liters: 2.0
+  cylinders: 4
+  layout: inline
+  induction: turbocharged with intercooler
+  injection: direct injection
+public_gearbox:
+  supplier: 3MO
+  forward_gears: 6
+
+max_throttle: 1.0
+max_accel: 5.5
+drivetrain_efficiency: 0.92
+gears: [1, 2, 3, 4, 5, 6]
+max_speed: 82.0
+notes: Engine and gearbox identity follow public A2RL material; acceleration is a conservative simulation estimate.

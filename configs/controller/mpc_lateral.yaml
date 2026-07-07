@@ -1,0 +1,10 @@
+name: lateral_mpc
+horizon_steps: 15
+dt: 0.02
+weight_lateral_error: 8.0
+weight_heading_error: 2.5
+weight_steering: 0.05
+weight_steering_rate: 0.6
+fallback_lateral_gain: 0.18
+fallback_heading_gain: 1.15
+use_osqp: false

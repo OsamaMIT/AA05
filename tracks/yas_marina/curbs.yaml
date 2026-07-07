@@ -1,0 +1,22 @@
+curb_level: 1
+description: 'Level-1 flat curbs: semantic full-loop edge zones only; track limits
+  remain TUMFTM widths.'
+curbs:
+- side: left
+  s_start: 0.0
+  s_end: 5546.5695165063935
+  width: 1.0
+  height: 0.0
+  friction: 1.0
+  type: flat_semantic_edge_zone
+  penalty_weight: 0.2
+  legal_status: legal_but_penalized
+- side: right
+  s_start: 0.0
+  s_end: 5546.5695165063935
+  width: 1.0
+  height: 0.0
+  friction: 1.0
+  type: flat_semantic_edge_zone
+  penalty_weight: 0.2
+  legal_status: legal_but_penalized

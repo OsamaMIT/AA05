@@ -1,0 +1,9 @@
+name: speed_pid
+kp_throttle: 0.28
+ki_throttle: 0.03
+kd_throttle: 0.01
+kp_brake: 0.35
+ki_brake: 0.02
+kd_brake: 0.01
+integral_limit: 8.0
+target_speed_deadband: 0.25

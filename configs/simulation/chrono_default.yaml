@@ -1,0 +1,9 @@
+physics_dt: 0.001
+control_dt: 0.02
+max_episode_time: 180.0
+headless: true
+backend: chrono
+chrono_mode: kinematic
+max_offtrack_steps: 20
+max_abs_yaw_rate: 2.5
+initial_speed: 3.0

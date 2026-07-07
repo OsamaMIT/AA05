@@ -1,0 +1,19 @@
+source:
+  repository: https://github.com/TUMFTM/racetrack-database
+  commit: e59595d1f3573b30d1ded6a08984935b957688e0
+  license: LGPL-3.0; retain upstream attribution when redistributing derived data.
+  track_path: tracks/YasMarina.csv
+  raceline_path: racelines/YasMarina.csv
+processed:
+  track_name: yas_marina
+  track_length_m: 5546.5695165063935
+  centerline_points: 1110
+  raceline_points: 1095
+  width_left_min_m: 4.559
+  width_left_max_m: 7.581
+  width_right_min_m: 4.862
+  width_right_max_m: 8.078
+level_1_curbs:
+  model: flat_semantic_full_edge_zones
+  physics_height_m: 0.0
+  friction_multiplier: 1.0

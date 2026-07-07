@@ -1,0 +1,7 @@
+platform: A2RL EAV24/EAV25-style open-wheel formula car
+drag_coefficient: 0.020
+downforce_coefficient: 2.8
+reference_area: 1.5
+air_density: 1.225
+front_downforce_distribution: 0.45
+notes: Placeholder aero model. Replace with Chrono/CFD/tunnel-derived maps when available.

@@ -1,0 +1,23 @@
+public_identity:
+  series: A2RL
+  model_family: Dallara EAV24 / EAV25
+  base_platform: Dallara Super Formula
+  season_2_variant: EAV-25
+  public_source: https://a2rl.io/autonomous-car-race
+  notes:
+    - Public A2RL data identifies the car as Dallara EAV24, upgraded to EAV-25 for Season 2.
+    - Simulation parameters are approximate and intentionally replaceable.
+
+mass: 795.0
+wheelbase: 3.115
+front_axle_to_cg: 1.56
+rear_axle_to_cg: 1.555
+body_length: 5.23
+body_width: 1.91
+body_height: 0.96
+track_width_front: 1.62
+track_width_rear: 1.58
+cg_height: 0.32
+max_speed: 82.0
+mass_notes: Includes an estimated allowance for autonomous compute, sensors, actuators, wiring, and safety hardware.
+notes: Approximate public-reference research values, not private A2RL team data.

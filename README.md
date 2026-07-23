@@ -30,7 +30,7 @@ neither figure is treated as a private dynamics parameter.
 ## Best Lap Replay
 
 The current best validated Chrono lap completes the full start/finish crossing
-in **1:46.860**, reaches **299.4 km/h**, and records no off-track samples. Both
+in **1:44.780**, reaches **298.5 km/h**, and records no off-track samples. Both
 replays run at 4x speed and come from the same deterministic evaluation log.
 
 | Full track | Follow camera |

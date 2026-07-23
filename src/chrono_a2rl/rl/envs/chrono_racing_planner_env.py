@@ -93,6 +93,9 @@ class ChronoRacingPlannerEnv(gym.Env):
             float(rl_cfg.get("profile_speed_residual_error_guard_mps", 5.0)),
             1.0e-6,
         )
+        self.profile_residual_disable_during_coast = bool(
+            rl_cfg.get("profile_residual_disable_during_coast", True)
+        )
         self.longitudinal_action_deadband = clamp(
             float(rl_cfg.get("longitudinal_action_deadband", 0.05)),
             0.0,
@@ -534,6 +537,7 @@ class ChronoRacingPlannerEnv(gym.Env):
             * MPS_TO_KMH,
             "profile_pid_throttle": profile_speed_cmd.throttle_target,
             "profile_pid_brake": profile_speed_cmd.brake_target,
+            "profile_pid_mode": self.speed.last_mode,
             "profile_residual_pedal": effective_residual_pedal,
             "profile_residual_guard": residual_guard,
             "profile_residual_authority": self.profile_residual_authority,
@@ -770,6 +774,11 @@ class ChronoRacingPlannerEnv(gym.Env):
             * self.profile_residual_authority
             * residual_guard
         )
+        if (
+            self.profile_residual_disable_during_coast
+            and self.speed.last_mode == "coast"
+        ):
+            effective_residual = 0.0
         profile_pedal = (
             profile_command.throttle_target - profile_command.brake_target
         )

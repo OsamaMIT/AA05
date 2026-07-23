@@ -59,6 +59,7 @@ aa help
 aa train
 aa eval
 aa watch
+aa optimize
 ```
 
 ## Run Tests
@@ -115,6 +116,59 @@ If your source file uses unusual column names, normalize it to:
 ```text
 x_m,y_m,w_tr_right_m,w_tr_left_m
 ```
+
+## Optimize The Speed Profile
+
+Find the fastest repeatable profile that the current controller/backend can
+complete:
+
+```bash
+aa optimize --backend chrono
+```
+
+The optimizer divides Yas Marina into `50 m` segments, runs a flying-lap
+baseline with the profile PID and zero RL residual, and raises target speed by
+1% in locally healthy segments. A candidate is retained only when it:
+
+- crosses the real start/finish line
+- improves lap time
+- remains within the configured boundary margin
+- respects raceline-error and heading-error limits
+- avoids excessive steering saturation
+
+After convergence, it backs the best validated segment scales off by 1% and
+validates the resulting profile again. Each run writes an ignored artifact
+directory containing:
+
+```text
+optimized_speed_profile.csv
+iteration_history.csv
+segment_diagnostics.csv
+optimization_summary.yaml
+```
+
+Activate an output profile in an experiment:
+
+```yaml
+speed_profile:
+  profile_path: artifacts/profile_optimization/RUN_ID/optimized_speed_profile.csv
+```
+
+The profile PID uses an asymmetric coast window. When the car is up to
+`5.4 km/h` faster than a shallow target-speed dip, it commands neither throttle
+nor brake and decays its integrator. A larger profile drop still produces
+normal braking. The PPO pedal residual is disabled during this explicit coast
+mode, so it cannot turn a deliberate coast into unnecessary throttle or brake.
+
+The default Yas Marina profile also uses a curvature-dependent lateral
+acceleration envelope. Shallow raceline bends smoothly receive up to
+`27 m/s²`, while curvature at or above `0.012 rad/m` retains the normal
+`19 m/s²` corner limit. This specifically avoids treating the flowing bends
+after Turn 2 like full braking events.
+
+The normal PID, RL environment, evaluation, and watch commands then load that
+profile. See [Speed Profile Optimization](docs/SPEED_PROFILE_OPTIMIZATION.md)
+for tuning and acceptance details.
 
 ## Level-1 Track Limits And Curbs
 

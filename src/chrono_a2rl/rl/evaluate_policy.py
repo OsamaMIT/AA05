@@ -118,6 +118,7 @@ def evaluate_policy(
             ),
             "profile_pid_throttle": float(info.get("profile_pid_throttle", 0.0)),
             "profile_pid_brake": float(info.get("profile_pid_brake", 0.0)),
+            "profile_pid_mode": str(info.get("profile_pid_mode", "")),
             "profile_residual_pedal": float(
                 info.get("profile_residual_pedal", 0.0)
             ),

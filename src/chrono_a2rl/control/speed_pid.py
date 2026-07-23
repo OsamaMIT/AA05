@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from typing import Any
 
 from chrono_a2rl.common.math_utils import clamp
@@ -22,12 +23,27 @@ class SpeedPIDController(Controller):
         self.kd_brake = float(cfg.get("kd_brake", 0.01))
         self.integral_limit = float(cfg.get("integral_limit", 8.0))
         self.deadband = float(cfg.get("target_speed_deadband", 0.25))
+        self.coast_enabled = bool(cfg.get("coast_enabled", False))
+        self.coast_underspeed_band = max(
+            float(cfg.get("coast_underspeed_band_mps", self.deadband)),
+            0.0,
+        )
+        self.coast_overspeed_band = max(
+            float(cfg.get("coast_overspeed_band_mps", self.deadband)),
+            0.0,
+        )
+        self.coast_integral_decay_rate = max(
+            float(cfg.get("coast_integral_decay_rate", 4.0)),
+            0.0,
+        )
         self._integral = 0.0
         self._previous_error = 0.0
+        self.last_mode = "coast"
 
     def reset(self) -> None:
         self._integral = 0.0
         self._previous_error = 0.0
+        self.last_mode = "coast"
 
     def compute_command(
         self,
@@ -37,10 +53,32 @@ class SpeedPIDController(Controller):
         dt: float,
     ) -> VehicleCommand:
         del track_state
-        error = reference.target_speed - state.speed
-        if abs(error) < self.deadband:
-            error = 0.0
         dt_safe = max(dt, 1.0e-6)
+        raw_error = reference.target_speed - state.speed
+        if self.coast_enabled and (
+            -self.coast_overspeed_band
+            <= raw_error
+            <= self.coast_underspeed_band
+        ):
+            self._integral *= math.exp(-self.coast_integral_decay_rate * dt_safe)
+            self._previous_error = 0.0
+            self.last_mode = "coast"
+            return VehicleCommand(
+                throttle_target=0.0,
+                brake_target=0.0,
+                gear_request=max(1, state.gear),
+                command_timestamp=state.sim_time,
+                command_valid_until=state.sim_time + dt,
+            )
+
+        if self.coast_enabled:
+            error = (
+                raw_error - self.coast_underspeed_band
+                if raw_error > 0.0
+                else raw_error + self.coast_overspeed_band
+            )
+        else:
+            error = 0.0 if abs(raw_error) < self.deadband else raw_error
         self._integral = clamp(
             self._integral + error * dt_safe,
             -self.integral_limit,
@@ -50,6 +88,7 @@ class SpeedPIDController(Controller):
         self._previous_error = error
 
         if error >= 0.0:
+            self.last_mode = "throttle"
             throttle = (
                 self.kp_throttle * error
                 + self.ki_throttle * self._integral
@@ -64,6 +103,7 @@ class SpeedPIDController(Controller):
             )
 
         brake_error = -error
+        self.last_mode = "brake"
         brake = (
             self.kp_brake * brake_error
             - self.ki_brake * self._integral

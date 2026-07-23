@@ -292,10 +292,29 @@ def test_profile_pid_removes_residual_authority_for_large_speed_error() -> None:
     env.close()
 
 
+def test_profile_pid_coast_mode_blocks_policy_throttle_residual() -> None:
+    env = _make_env()
+    env.reset(seed=12)
+    env.speed.last_mode = "coast"
+
+    throttle, brake, residual, guard = env._profile_tracking_targets(
+        VehicleCommand(throttle_target=0.0, brake_target=0.0),
+        policy_throttle=1.0,
+        policy_brake=0.0,
+    )
+
+    assert throttle == 0.0
+    assert brake == 0.0
+    assert residual == 0.0
+    assert guard > 0.0
+    env.close()
+
+
 def test_profile_residual_is_bounded_near_target_speed() -> None:
     env = _make_env()
     env.reset(seed=11)
     env.reference = env.reference.__class__(target_speed=env.state.speed)
+    env.speed.last_mode = "throttle"
 
     throttle, brake, residual, guard = env._profile_tracking_targets(
         VehicleCommand(),

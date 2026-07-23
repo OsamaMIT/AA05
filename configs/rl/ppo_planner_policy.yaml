@@ -22,6 +22,7 @@ action_mode: profile_pedal_residual
 profile_speed_tracking_enabled: true
 profile_speed_residual_authority: 0.08
 profile_speed_residual_error_guard_mps: 5.0
+profile_residual_disable_during_coast: true
 longitudinal_action_deadband: 0.05
 longitudinal_action_rise_rate: 6.0
 longitudinal_action_fall_rate: 10.0

@@ -14,6 +14,7 @@ def test_aa_help_lists_main_commands(capsys) -> None:
     assert "train" in captured.out
     assert "eval" in captured.out
     assert "watch" in captured.out
+    assert "optimize" in captured.out
 
 
 def test_aa_help_subcommand_lists_main_commands(capsys) -> None:
@@ -39,6 +40,15 @@ def test_aa_help_watch_shows_camera_options(capsys) -> None:
     assert "usage: aa watch" in captured.out
     assert "--camera" in captured.out
     assert "--zoom-radius" in captured.out
+
+
+def test_aa_help_optimize_shows_profile_options(capsys) -> None:
+    main(["help", "optimize"])
+    captured = capsys.readouterr()
+
+    assert "usage: aa optimize" in captured.out
+    assert "--iterations" in captured.out
+    assert "--backend" in captured.out
 
 
 def test_aa_unknown_command_exits(capsys) -> None:

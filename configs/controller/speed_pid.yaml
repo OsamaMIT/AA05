@@ -7,3 +7,7 @@ ki_brake: 0.02
 kd_brake: 0.01
 integral_limit: 8.0
 target_speed_deadband: 0.25
+coast_enabled: true
+coast_underspeed_band_mps: 0.25
+coast_overspeed_band_mps: 1.5
+coast_integral_decay_rate: 4.0

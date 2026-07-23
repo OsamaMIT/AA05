@@ -2,7 +2,7 @@
 
 ```text
 configs + vehicle params
-    -> track loader and speed profile
+    -> track loader and generated/optimized speed profile
     -> ChronoDirectBackend
     -> DBW model and safety supervisor
     -> fast raceline steering + RL throttle/brake
@@ -23,7 +23,8 @@ concerns that are unnecessary in the critical training loop.
 - `track/` owns geometry, Frenet projection, curbs, and speed profiles.
 - `control/` owns controller interfaces, MPC/PID implementations, and safety.
 - `rl/` owns Gymnasium observations, rewards, environments, and SB3 training.
-- `evaluation/` owns metrics, replay, and future disturbance testing.
+- `evaluation/` owns metrics, replay, repeatable-profile optimization, and
+  future disturbance testing.
 
 ## RL Longitudinal Mode
 
@@ -35,9 +36,10 @@ DBW applies actuator lag and physical output limits. The separate full Tube MPC
 profile uses a constrained OSQP nominal controller and LQR ancillary feedback
 for later fine-tuning and evaluation.
 
-The curvature-derived raceline speed profile is exposed as preview information
-to the policy. It is not fed to a speed PID in this mode. This gives RL direct
-control of acceleration and braking without allowing steering shortcuts.
+The curvature-derived or optimized raceline speed profile is tracked by the
+speed PID. PPO receives the profile as preview information and supplies only a
+small guarded pedal residual, so it can fine-tune acceleration and braking
+without replacing baseline longitudinal control or steering.
 
 ## Current Backend
 

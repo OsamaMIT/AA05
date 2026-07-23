@@ -71,6 +71,10 @@ class TrackGeometry:
         self.name = name
         self.centerline = points
         self.raceline = None if raceline is None else np.asarray(raceline, dtype=float)
+        self._raceline_s_cache: np.ndarray | None = None
+        self._raceline_n_cache: np.ndarray | None = None
+        self._raceline_curvature_s_cache: np.ndarray | None = None
+        self._raceline_curvature_cache: np.ndarray | None = None
         self.curbs = curbs or CurbMap([])
 
         self.width_left = self._as_array(width_left, len(points), "width_left")
@@ -124,6 +128,32 @@ class TrackGeometry:
         """Wrap arc length to [0, track_length)."""
 
         return float(s % self.length)
+
+    def forward_distance(self, start_s: float, end_s: float) -> float:
+        """Return forward closed-loop distance from ``start_s`` to ``end_s``."""
+
+        return float((self.wrap_s(end_s) - self.wrap_s(start_s)) % self.length)
+
+    def crossed_line_forward(
+        self,
+        previous_s: float,
+        current_s: float,
+        *,
+        line_s: float = 0.0,
+    ) -> bool:
+        """Return whether a forward step crossed a configured track line.
+
+        Arc lengths are expressed relative to the line so this works for a
+        start/finish line at any point on the closed loop. The half-lap guard
+        distinguishes a genuine forward wrap from reverse motion across it.
+        """
+
+        previous_relative = self.wrap_s(previous_s - line_s)
+        current_relative = self.wrap_s(current_s - line_s)
+        return bool(
+            current_relative < previous_relative
+            and previous_relative - current_relative > 0.5 * self.length
+        )
 
     def interpolate(self, s: float) -> TrackSample:
         """Linearly interpolate track quantities at arc length `s`."""
@@ -209,6 +239,114 @@ class TrackGeometry:
             curb_side=curb_contact.side,
         )
 
+    def raceline_lateral_offset_at(self, s: float) -> float:
+        """Return raceline lateral offset `n` at centerline arc length.
+
+        If no raceline is available, the centerline is used as the neutral
+        reference and this returns zero.
+        """
+
+        if self.raceline is None or len(self.raceline) == 0:
+            return 0.0
+        s_values, n_values = self._raceline_frenet_offsets()
+        s_mod = self.wrap_s(s)
+        s_ext = np.concatenate([s_values, [s_values[0] + self.length]])
+        n_ext = np.concatenate([n_values, [n_values[0]]])
+        if s_mod < s_ext[0]:
+            s_mod += self.length
+        return float(np.interp(s_mod, s_ext, n_ext))
+
+    def raceline_curvature_at(self, s: float) -> float:
+        """Return green-raceline curvature at centerline arc length ``s``.
+
+        Raceline samples are projected onto centerline arc length once, which
+        lets planners reason about the path the car will actually follow while
+        retaining the existing Frenet coordinate contract. Tracks without a
+        raceline fall back to centerline curvature.
+        """
+
+        if self.raceline is None or len(self.raceline) < 4:
+            return self.interpolate(s).curvature
+        s_values, curvature_values = self._raceline_curvature_samples()
+        s_mod = self.wrap_s(s)
+        s_ext = np.concatenate([s_values, [s_values[0] + self.length]])
+        curvature_ext = np.concatenate([curvature_values, [curvature_values[0]]])
+        if s_mod < s_ext[0]:
+            s_mod += self.length
+        return float(np.interp(s_mod, s_ext, curvature_ext))
+
+    def raceline_xy_at(self, s: float) -> tuple[float, float]:
+        """Return the raceline point indexed by centerline arc length."""
+
+        sample = self.interpolate(s)
+        offset = self.raceline_lateral_offset_at(s)
+        normal_x = -math.sin(sample.heading)
+        normal_y = math.cos(sample.heading)
+        return (
+            sample.x + offset * normal_x,
+            sample.y + offset * normal_y,
+        )
+
+    def raceline_heading_at(self, s: float, *, difference_step: float = 0.5) -> float:
+        """Return raceline tangent heading using a centered finite difference."""
+
+        step = max(float(difference_step), 1.0e-3)
+        previous = self.raceline_xy_at(s - step)
+        following = self.raceline_xy_at(s + step)
+        return float(
+            math.atan2(
+                following[1] - previous[1],
+                following[0] - previous[0],
+            )
+        )
+
+    def curvature_at(self, s: float, *, source: str = "centerline") -> float:
+        """Return curvature from the selected path geometry."""
+
+        if source.lower() == "raceline":
+            return self.raceline_curvature_at(s)
+        return self.interpolate(s).curvature
+
+    def _raceline_frenet_offsets(self) -> tuple[np.ndarray, np.ndarray]:
+        """Project raceline samples to centerline Frenet coordinates once."""
+
+        if self._raceline_s_cache is not None and self._raceline_n_cache is not None:
+            return self._raceline_s_cache, self._raceline_n_cache
+        assert self.raceline is not None
+        projections = [self.project_xy(float(point[0]), float(point[1])) for point in self.raceline]
+        s_values = np.asarray([projection.s for projection in projections], dtype=float)
+        n_values = np.asarray([projection.n for projection in projections], dtype=float)
+        order = np.argsort(s_values)
+        s_sorted = s_values[order]
+        n_sorted = n_values[order]
+        unique_mask = np.concatenate([[True], np.diff(s_sorted) > 1.0e-6])
+        self._raceline_s_cache = s_sorted[unique_mask]
+        self._raceline_n_cache = n_sorted[unique_mask]
+        return self._raceline_s_cache, self._raceline_n_cache
+
+    def _raceline_curvature_samples(self) -> tuple[np.ndarray, np.ndarray]:
+        """Return raceline curvature indexed by projected centerline distance."""
+
+        if (
+            self._raceline_curvature_s_cache is not None
+            and self._raceline_curvature_cache is not None
+        ):
+            return self._raceline_curvature_s_cache, self._raceline_curvature_cache
+        assert self.raceline is not None
+        points = self.raceline
+        if np.linalg.norm(points[0] - points[-1]) < 1.0e-6:
+            points = points[:-1]
+        curvature = _closed_path_curvature(points)
+        projections = [self.project_xy(float(point[0]), float(point[1])) for point in points]
+        s_values = np.asarray([projection.s for projection in projections], dtype=float)
+        order = np.argsort(s_values)
+        s_sorted = s_values[order]
+        curvature_sorted = curvature[order]
+        unique_mask = np.concatenate([[True], np.diff(s_sorted) > 1.0e-6])
+        self._raceline_curvature_s_cache = s_sorted[unique_mask]
+        self._raceline_curvature_cache = curvature_sorted[unique_mask]
+        return self._raceline_curvature_s_cache, self._raceline_curvature_cache
+
     def sample_arrays(self) -> dict[str, np.ndarray]:
         """Return arrays useful for plotting and processing outputs."""
 
@@ -221,3 +359,22 @@ class TrackGeometry:
             "width_left": self.width_left.copy(),
             "width_right": self.width_right.copy(),
         }
+
+
+def _closed_path_curvature(points: np.ndarray) -> np.ndarray:
+    """Compute signed three-point curvature for a closed Cartesian path."""
+
+    curvature = np.zeros(len(points), dtype=float)
+    for index in range(len(points)):
+        previous = points[index - 1]
+        current = points[index]
+        following = points[(index + 1) % len(points)]
+        a = np.linalg.norm(current - previous)
+        b = np.linalg.norm(following - current)
+        c = np.linalg.norm(following - previous)
+        denominator = max(a * b * c, _EPS)
+        incoming = current - previous
+        outgoing = following - current
+        cross = incoming[0] * outgoing[1] - incoming[1] * outgoing[0]
+        curvature[index] = float(2.0 * cross / denominator)
+    return curvature

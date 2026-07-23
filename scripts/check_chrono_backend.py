@@ -14,6 +14,7 @@ if str(SRC) not in sys.path:
 from chrono_a2rl.chrono_interface.direct_backend import ChronoDirectBackend
 from chrono_a2rl.common.config import load_experiment_config
 from chrono_a2rl.common.types import VehicleCommand, VehicleState
+from chrono_a2rl.evaluation.metrics import MPS_TO_KMH
 
 
 def main() -> None:
@@ -25,7 +26,7 @@ def main() -> None:
     backend.close()
     print(f"backend={backend._backend.__class__.__name__}")  # noqa: SLF001
     print(f"sim_time={state.sim_time:.3f}")
-    print(f"speed={state.speed:.3f}")
+    print(f"speed_kmh={state.speed * MPS_TO_KMH:.3f}")
 
 
 if __name__ == "__main__":

@@ -18,6 +18,11 @@ description:
 - High-level computer: Neousys RGS-8805GC
 
 Primary source: https://a2rl.io/autonomous-car-race
+Published up-to-300 km/h platform specification:
+https://www.aspireuae.ae/news/uaes-aspire-redefines-extreme-autonomous-sports-a2rl-unveils-autonomous-dallara-super-formula
+A2RL reported 295 km/h autonomous speed source:
+https://a2rl.io/news/42/295-kmph-without-human-driver-How-UAE-engineers-are-teaching-cars-to-race-themselves
+EAV-25 upgrade source: https://a2rl.io/eav25
 
 ## Simulation Parameters
 
@@ -26,12 +31,18 @@ publish exact mass, inertia tensor, aero maps, tire curves, actuator rate
 limits, or braking maps. The MVP therefore uses conservative values that are
 easy to replace:
 
+- `300 km/h` published platform top-speed cap for race-speed training
+  experiments; 295 km/h remains the reported achieved autonomous-speed
+  reference
 - estimated race-ready mass including autonomous stack
 - Super Formula-scale wheelbase and body dimensions
-- simple drag/rolling resistance model in the mock backend
+- simple aggregate drag/rolling resistance model in the mock backend
 - box-inertia estimate for the first PyChrono chassis body
 - placeholder cornering stiffness and friction
 - placeholder DBW actuator lags and steering-rate limits
+
+The mock backend's `drag_coefficient` is an aggregate speed-squared loss in
+`m/s^2`, not a physical aerodynamic drag coefficient.
 
 ## Chrono Mode
 

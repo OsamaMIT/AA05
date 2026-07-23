@@ -1,10 +1,17 @@
 name: lateral_mpc
+mode: pure_pursuit
 horizon_steps: 15
 dt: 0.02
 weight_lateral_error: 8.0
 weight_heading_error: 2.5
+weight_steering_state: 0.15
 weight_steering: 0.05
 weight_steering_rate: 0.6
 fallback_lateral_gain: 0.18
 fallback_heading_gain: 1.15
+fallback_method: pure_pursuit
+fallback_min_preview_distance: 2.0
 use_osqp: false
+tube_enabled: true
+tube_boundary_margin: 0.35
+tube_soft_boundary_gain: 0.22

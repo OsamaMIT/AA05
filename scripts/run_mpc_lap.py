@@ -26,7 +26,12 @@ from chrono_a2rl.control.mpc_lateral import LateralMPCController
 from chrono_a2rl.control.reference_generator import make_reference
 from chrono_a2rl.control.safety_supervisor import SafetySupervisor
 from chrono_a2rl.control.speed_pid import SpeedPIDController
-from chrono_a2rl.evaluation.metrics import compute_metrics, metrics_to_dict
+from chrono_a2rl.evaluation.metrics import (
+    MPS_TO_KMH,
+    compute_metrics,
+    format_lap_time,
+    metrics_to_dict,
+)
 from chrono_a2rl.track.speed_profile import generate_speed_profile
 from chrono_a2rl.track.track_loader import load_track_from_config
 
@@ -53,6 +58,7 @@ def run(config_path: str | Path, backend_override: str | None = None) -> dict[st
     backend = ChronoDirectBackend(vehicle, simulation)
     initial_state = initial_state_from_track(track, s=0.0, speed=initial_speed)
     state = backend.reset(initial_state)
+    episode_start_time = float(state.sim_time)
     lateral = LateralMPCController(config["controller"].get("lateral", {}), vehicle)
     speed = SpeedPIDController(config["controller"].get("speed", {}))
     supervisor = SafetySupervisor(vehicle, simulation)
@@ -62,14 +68,22 @@ def run(config_path: str | Path, backend_override: str | None = None) -> dict[st
     previous_s = track.track_state_at_pose(state.x, state.y, state.yaw).s
     accumulated_progress = 0.0
     offtrack_streak = 0
-    complete_fraction = float(config.get("termination", {}).get("complete_lap_fraction", 0.98))
-    stop_on_offtrack = bool(config.get("termination", {}).get("stop_on_offtrack", True))
-    stop_on_instability = bool(config.get("termination", {}).get("stop_on_instability", True))
+    termination_config = config.get("termination", {})
+    start_finish_s = track.wrap_s(float(termination_config.get("start_finish_s", 0.0)))
+    minimum_lap_fraction = float(termination_config.get("minimum_lap_fraction", 0.95))
+    stop_on_offtrack = bool(termination_config.get("stop_on_offtrack", True))
+    stop_on_instability = bool(termination_config.get("stop_on_instability", True))
 
     max_steps = int(max_time / dt)
     for step in range(max_steps):
         track_state = track.track_state_at_pose(state.x, state.y, state.yaw)
-        reference = make_reference(track, speed_profile, track_state)
+        reference = make_reference(
+            track,
+            speed_profile,
+            track_state,
+            horizon_steps=lateral.horizon_steps,
+            control_dt=dt,
+        )
         steer_cmd = lateral.compute_command(state, track_state, reference, dt)
         speed_cmd = speed.compute_command(state, track_state, reference, dt)
         command = VehicleCommand(
@@ -84,13 +98,23 @@ def run(config_path: str | Path, backend_override: str | None = None) -> dict[st
         state = backend.step(safe_command, dt)
         next_track_state = track.track_state_at_pose(state.x, state.y, state.yaw)
 
-        ds = next_track_state.s - previous_s
+        previous_track_s = previous_s
+        ds = next_track_state.s - previous_track_s
         if ds < -0.5 * track.length:
             ds += track.length
         elif ds > 0.5 * track.length:
             ds -= track.length
         accumulated_progress += max(0.0, ds)
         previous_s = next_track_state.s
+        crossed_start_finish = track.crossed_line_forward(
+            previous_track_s,
+            next_track_state.s,
+            line_s=start_finish_s,
+        )
+        lap_completed = (
+            crossed_start_finish
+            and accumulated_progress >= minimum_lap_fraction * track.length
+        )
 
         if not next_track_state.on_track:
             offtrack_streak += 1
@@ -100,17 +124,21 @@ def run(config_path: str | Path, backend_override: str | None = None) -> dict[st
         control_saturated = supervisor.last_saturated or backend.last_control_saturated
         row = {
             "step": step,
-            "sim_time": state.sim_time,
+            "sim_time": format_lap_time(state.sim_time),
+            "sim_time_seconds": state.sim_time,
+            "episode_time_seconds": state.sim_time - episode_start_time,
             "x": state.x,
             "y": state.y,
             "yaw": state.yaw,
-            "speed": state.speed,
+            "speed_kmh": state.speed * MPS_TO_KMH,
             "yaw_rate": state.yaw_rate,
             "steering_angle": state.steering_angle,
             "throttle": state.throttle,
             "brake": state.brake,
             "s": next_track_state.s,
             "progress_s": accumulated_progress,
+            "start_finish_s": start_finish_s,
+            "crossed_start_finish": crossed_start_finish,
             "lateral_error": next_track_state.n,
             "heading_error": next_track_state.heading_error,
             "curvature": next_track_state.curvature,
@@ -122,18 +150,26 @@ def run(config_path: str | Path, backend_override: str | None = None) -> dict[st
             "curb_penalty_weight": (
                 next_track_state.curb_penalty_weight if next_track_state.on_curb else 0.0
             ),
-            "target_speed": reference.target_speed,
+            "target_speed_kmh": reference.target_speed * MPS_TO_KMH,
             "steering_target": safe_command.steering_target,
             "throttle_target": safe_command.throttle_target,
             "brake_target": safe_command.brake_target,
             "emergency_brake": safe_command.emergency_brake,
             "control_saturated": control_saturated,
             "supervisor_reason": supervisor.last_reason,
+            "lateral_controller_mode": lateral.mode,
+            "mpc_solver_status": lateral.last_solver_status,
+            "mpc_nominal_steering": lateral.last_nominal_steering,
+            "mpc_ancillary_correction": lateral.last_ancillary_correction,
+            "mpc_tube_lateral_bound": float(lateral.last_tube_state_bound[0]),
+            "mpc_tube_heading_bound": float(lateral.last_tube_state_bound[1]),
+            "mpc_tube_steering_bound": float(lateral.last_tube_state_bound[2]),
+            "mpc_tube_input_bound": lateral.last_tube_input_bound,
             "termination_reason": "",
         }
         rows.append(row)
 
-        if accumulated_progress >= complete_fraction * track.length:
+        if lap_completed:
             termination_reason = "lap_completed"
             break
         if stop_on_offtrack and offtrack_streak >= max_offtrack_steps:

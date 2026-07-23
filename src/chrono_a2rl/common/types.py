@@ -67,6 +67,10 @@ class ControllerReference:
     target_y: float = 0.0
     target_yaw: float = 0.0
     target_curvature: float = 0.0
+    target_lateral_offset: float = 0.0
+    current_target_yaw: float = 0.0
+    current_target_curvature: float = 0.0
+    curvature_preview: tuple[float, ...] = ()
 
 
 @dataclass(slots=True)
@@ -94,6 +98,30 @@ class EpisodeMetrics:
     curb_usage_fraction: float = 0.0
     curb_penalty_total: float = 0.0
     control_saturation_count: int = 0
+    mean_speed_scale: float = 0.0
+    min_speed_scale: float = 0.0
+    max_speed_scale: float = 0.0
+    mean_target_speed_kmh: float = 0.0
+    max_target_speed_kmh: float = 0.0
+    profile_speed_error_rmse_kmh: float = 0.0
+    profile_speed_error_mae_kmh: float = 0.0
+    mean_longitudinal_action: float = 0.0
+    min_longitudinal_action: float = 0.0
+    max_longitudinal_action: float = 0.0
+    mean_throttle: float = 0.0
+    mean_brake: float = 0.0
+    braking_fraction: float = 0.0
+    max_validated_progress_m: float = 0.0
+    frontier_progress_m: float = 0.0
+    frontier_advancement_m: float = 0.0
+    frontier_cleared: bool = False
+    training_role: str = "evaluation"
+    corner_completion_count: int = 0
+    mean_corner_score: float = 0.0
+    max_corner_score: float = 0.0
+    mean_apex_speed_kmh: float = 0.0
+    mean_exit_speed_kmh: float = 0.0
+    kinetic_crash_penalty: float = 0.0
     termination_reason: str = "not_started"
 
 

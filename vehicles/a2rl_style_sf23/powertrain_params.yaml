@@ -11,8 +11,8 @@ public_gearbox:
   forward_gears: 6
 
 max_throttle: 1.0
-max_accel: 5.5
+max_accel: 14.0
 drivetrain_efficiency: 0.92
 gears: [1, 2, 3, 4, 5, 6]
-max_speed: 82.0
-notes: Engine and gearbox identity follow public A2RL material; acceleration is a conservative simulation estimate.
+max_speed: 83.3333333333
+notes: Engine and gearbox identity follow public A2RL material; top speed uses the published up-to-300 km/h platform capability.

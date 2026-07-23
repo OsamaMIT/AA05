@@ -62,7 +62,7 @@ def test_metrics_include_curb_usage() -> None:
     rows = [
         {
             "sim_time": 0.0,
-            "speed": 10.0,
+            "speed_kmh": 36.0,
             "lateral_error": 0.0,
             "heading_error": 0.0,
             "on_track": True,
@@ -72,7 +72,7 @@ def test_metrics_include_curb_usage() -> None:
         },
         {
             "sim_time": 0.02,
-            "speed": 11.0,
+            "speed_kmh": 39.6,
             "lateral_error": 0.2,
             "heading_error": 0.01,
             "on_track": True,

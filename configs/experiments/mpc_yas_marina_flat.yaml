@@ -10,18 +10,21 @@ component_configs:
 
 simulation:
   max_episode_time: 600.0
+  initial_speed: 12.0
+  max_abs_yaw_rate: 4.5
 
 speed_profile:
   min_speed: 5.0
   max_speed: 15.0
   max_lateral_accel: 3.5
-  smoothing_window: 21
+  smoothing_window: 1
 
 logging:
   log_dir: logs
   save_csv: true
 
 termination:
-  complete_lap_fraction: 0.98
+  start_finish_s: 0.0
+  minimum_lap_fraction: 0.95
   stop_on_offtrack: true
   stop_on_instability: true

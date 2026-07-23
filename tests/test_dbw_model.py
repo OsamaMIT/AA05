@@ -59,3 +59,25 @@ def test_dbw_prevents_throttle_brake_conflict() -> None:
     )
     assert applied.throttle_target == 0.0
     assert applied.brake_target == 0.7
+
+
+def test_dbw_brake_command_clears_lingering_throttle() -> None:
+    dbw = DBWModel(
+        {
+            "max_steer_rate": 100.0,
+            "steering_time_constant": 0.0,
+            "throttle_time_constant": 0.2,
+            "brake_time_constant": 0.2,
+            "brake_priority": True,
+        }
+    )
+    state = VehicleState(throttle=0.8, brake=0.0)
+
+    applied = dbw.apply(
+        VehicleCommand(throttle_target=0.0, brake_target=0.5),
+        state,
+        0.02,
+    )
+
+    assert applied.throttle_target == 0.0
+    assert applied.brake_target > 0.0

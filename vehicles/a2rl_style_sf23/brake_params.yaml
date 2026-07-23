@@ -1,6 +1,6 @@
 public_brake_architecture: Brembo carbon discs and calipers, electro-hydraulically activated
 max_brake: 1.0
-max_decel: 12.0
+max_decel: 16.0
 front_bias: 0.58
 actuator_time_constant: 0.08
 emergency_brake:

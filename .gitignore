@@ -1,29 +1,86 @@
+# Python environments and local configuration
 .venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# Python caches, test output, and build products
 __pycache__/
 *.py[cod]
+*$py.class
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.hypothesis/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
 build/
 dist/
+site/
 *.egg-info/
 
-logs/*
+# Editors and operating-system metadata
+.idea/
+.vscode/
+*.code-workspace
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Runtime logs, TensorBoard data, and local Matplotlib state
+logs/**
 !logs/.gitkeep
-models/*
-!models/.gitkeep
-
-tracks/yas_marina/raw/
-tracks/yas_marina/processed/*
-!tracks/yas_marina/processed/.gitkeep
-!tracks/yas_marina/processed/*.csv
-!tracks/yas_marina/processed/*.yaml
-
-*.csv
-!tracks/**/processed/.gitkeep
-!tracks/yas_marina/processed/*.csv
-*.png
-*.npz
-*.pkl
-*.zip
 events.out.tfevents.*
+*.log
+
+# Training runs, checkpoints, and exported models
+models/**
+!models/.gitkeep
+checkpoints/
+runs/
+wandb/
+*.ckpt
+*.joblib
+*.onnx
+*.pkl
+*.pt
+*.pth
+*.zip
+
+# Generated datasets, arrays, reports, plots, and media
+artifacts/
+outputs/
+tmp/
+*.csv
+*.npz
+*.npy
+*.parquet
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp4
+*.mkv
+*.mov
+*.webm
+
+# External track data is downloaded locally. Keep only the small canonical
+# Yas Marina files required for the out-of-the-box project.
+tracks/*/raw/
+tracks/yas_marina/processed/**
+!tracks/yas_marina/processed/.gitkeep
+!tracks/yas_marina/processed/yas_marina.csv
+!tracks/yas_marina/processed/yas_marina_raceline.csv
+!tracks/yas_marina/processed/yas_marina_metadata.yaml
+
+# Curated README replays are the sole generated-media exception.
+!docs/assets/
+!docs/assets/replays/
+!docs/assets/replays/best_lap_full.gif
+!docs/assets/replays/best_lap_follow.gif

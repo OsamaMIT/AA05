@@ -113,10 +113,14 @@ def load_experiment_config(path: str | Path) -> dict[str, Any]:
         if key in experiment:
             merged[key] = deep_merge(merged.get(key, {}), experiment[key])
 
-    merged["experiment"] = {
+    experiment_extras = {
         key: value
         for key, value in experiment.items()
         if key not in {"component_configs", "vehicle", "track", "controller", "simulation", "rl"}
     }
+    merged["experiment"] = experiment_extras
+    for key, value in experiment_extras.items():
+        if key not in merged:
+            merged[key] = deepcopy(value)
     merged["experiment_path"] = str(experiment_path)
     return merged

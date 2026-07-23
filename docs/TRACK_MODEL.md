@@ -32,12 +32,24 @@ computes:
 - arc length `s`
 - segment heading
 - signed curvature
+- raceline curvature indexed by centerline `s`
 - closed-loop interpolation
 - Frenet projection from `(x, y)` to `(s, n)`
 - left/right boundary distances
+- forward line-crossing detection for a configurable start/finish position
 
 Positive `n` means the vehicle is left of the centerline relative to travel
 direction.
+
+The planner selects `curvature_source: raceline` for its speed profile. Green
+raceline samples are projected onto centerline `s`, preserving the Frenet
+interface while making speed limits respond to the path the controller is
+actually asked to follow.
+
+Lap completion is not inferred from a percentage of track length. Evaluation
+requires a forward crossing of `termination.start_finish_s` after at least the
+configured minimum lap distance. This keeps timing active through the complete
+main straight and rejects reverse-motion jitter across the line.
 
 ## Fallback Track
 

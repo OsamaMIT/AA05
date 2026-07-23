@@ -22,6 +22,7 @@ class DBWModel:
         self.steering_tau = float(cfg.get("steering_time_constant", 0.06))
         self.throttle_tau = float(cfg.get("throttle_time_constant", 0.10))
         self.brake_tau = float(cfg.get("brake_time_constant", 0.07))
+        self.brake_priority = bool(cfg.get("brake_priority", True))
         self._last_command = VehicleCommand()
         self.last_saturated = False
 
@@ -66,21 +67,20 @@ class DBWModel:
             else:
                 brake_target = 0.0
 
-        max_delta = self.max_steer_rate * dt
-        rate_limited_steer = clamp(
-            steering_target,
-            state.steering_angle - max_delta,
-            state.steering_angle + max_delta,
-        )
-        if not math.isclose(rate_limited_steer, steering_target):
-            self.last_saturated = True
-
-        steering = self._first_order_lag(
+        lagged_steer = self._first_order_lag(
             previous=state.steering_angle,
-            target=rate_limited_steer,
+            target=steering_target,
             dt=dt,
             tau=self.steering_tau,
         )
+        max_delta = self.max_steer_rate * dt
+        steering = clamp(
+            lagged_steer,
+            state.steering_angle - max_delta,
+            state.steering_angle + max_delta,
+        )
+        if not math.isclose(steering, lagged_steer):
+            self.last_saturated = True
         throttle = self._first_order_lag(
             previous=state.throttle,
             target=throttle_target,
@@ -93,6 +93,9 @@ class DBWModel:
             dt=dt,
             tau=self.brake_tau,
         )
+
+        if self.brake_priority and brake_target > 0.0:
+            throttle = 0.0
 
         if throttle > 0.01 and brake > 0.01:
             self.last_saturated = True

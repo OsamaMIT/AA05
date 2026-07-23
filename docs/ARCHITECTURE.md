@@ -5,7 +5,7 @@ configs + vehicle params
     -> track loader and speed profile
     -> ChronoDirectBackend
     -> DBW model and safety supervisor
-    -> lateral MPC + speed PID
+    -> fast raceline steering + RL throttle/brake
     -> lap runner and metrics
     -> Gymnasium speed-policy wrapper
 ```
@@ -24,6 +24,20 @@ concerns that are unnecessary in the critical training loop.
 - `control/` owns controller interfaces, MPC/PID implementations, and safety.
 - `rl/` owns Gymnasium observations, rewards, environments, and SB3 training.
 - `evaluation/` owns metrics, replay, and future disturbance testing.
+
+## RL Longitudinal Mode
+
+The planner environment fixes the geometric Yas Marina TUMFTM raceline and lets
+RL output one signed longitudinal action. Positive values command throttle,
+negative values command brake, and values inside the deadband coast. Lateral
+The default training profile uses tube-aware pure pursuit for steering while
+DBW applies actuator lag and physical output limits. The separate full Tube MPC
+profile uses a constrained OSQP nominal controller and LQR ancillary feedback
+for later fine-tuning and evaluation.
+
+The curvature-derived raceline speed profile is exposed as preview information
+to the policy. It is not fed to a speed PID in this mode. This gives RL direct
+control of acceleration and braking without allowing steering shortcuts.
 
 ## Current Backend
 

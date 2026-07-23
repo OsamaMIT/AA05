@@ -9,15 +9,44 @@ component_configs:
   simulation: configs/simulation/chrono_default.yaml
   rl: configs/rl/ppo_speed_policy.yaml
 
+simulation:
+  max_episode_time: 300.0
+  initial_speed: 12.0
+  max_abs_yaw_rate: 4.5
+
 speed_profile:
-  min_speed: 5.0
-  max_speed: 15.0
-  max_lateral_accel: 3.5
-  smoothing_window: 21
+  min_speed: 12.0
+  max_speed: 83.3333333333
+  max_lateral_accel: 18.0
+  max_accel: 8.0
+  max_decel: 14.0
+  smoothing_window: 31
 
 reward:
-  progress_weight: 1.0
-  offtrack_penalty: 25.0
-  curb_penalty_scale: 1.0
-  instability_penalty: 10.0
-  excessive_control_penalty: 0.05
+  progress_weight: 1.25
+  speed_reward_weight: 0.08
+  target_speed_reward_weight: 0.04
+  max_reward_speed: 83.3333333333
+  min_reward_speed: 10.0
+  low_speed_penalty: 0.04
+  time_penalty_per_step: 0.003
+  offtrack_penalty: 20.0
+  offtrack_terminal_penalty: 75.0
+  curb_penalty_scale: 1.5
+  curb_high_speed_penalty_scale: 1.0
+  curb_near_boundary_margin: 1.0
+  curb_near_boundary_penalty_scale: 2.0
+  curb_overuse_fraction_limit: 0.03
+  curb_overuse_penalty_scale: 8.0
+  curb_overuse_terminal_penalty: 120.0
+  curb_streak_time_limit: 0.35
+  curb_streak_penalty_scale: 4.0
+  curb_streak_terminal_penalty: 50.0
+  instability_penalty: 8.0
+  excessive_control_penalty: 0.015
+  completion_bonus: 500.0
+  timeout_penalty: 150.0
+
+termination:
+  start_finish_s: 0.0
+  minimum_lap_fraction: 0.95

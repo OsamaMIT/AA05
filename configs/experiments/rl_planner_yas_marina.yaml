@@ -1,0 +1,130 @@
+name: rl_longitudinal_yas_marina
+description: PPO pedal-residual policy above profile speed PID while lateral control follows the TUMFTM raceline.
+component_configs:
+  vehicle: configs/vehicle/a2rl_style_sf23.yaml
+  track: configs/track/yas_marina.yaml
+  controller:
+    lateral: configs/controller/mpc_lateral.yaml
+    speed: configs/controller/speed_pid.yaml
+  simulation: configs/simulation/chrono_default.yaml
+  rl: configs/rl/ppo_planner_policy.yaml
+
+simulation:
+  max_episode_time: 300.0
+  initial_speed: 12.0
+  max_abs_yaw_rate: 4.5
+
+speed_profile:
+  curvature_source: raceline
+  min_speed: 12.0
+  max_speed: 83.3333333333
+  max_lateral_accel: 19.0
+  max_accel: 8.0
+  max_decel: 16.0
+  smoothing_window: 9
+
+reward:
+  progress_weight: 1.25
+  speed_reward_weight: 0.08
+  target_speed_reward_weight: 0.0
+  profile_speed_tracking_reward_weight: 0.35
+  profile_speed_error_penalty_weight: 0.50
+  profile_speed_error_scale_kmh: 15.0
+  max_reward_speed: 83.3333333333
+  min_reward_speed: 10.0
+  low_speed_penalty: 0.04
+  straight_speed_reward_weight: 0.12
+  straight_target_speed_reward_weight: 0.0
+  straight_min_target_speed_fraction: 0.92
+  straight_low_target_speed_penalty: 0.0
+  straight_min_actual_speed_fraction: 0.70
+  straight_low_actual_speed_penalty: 0.0
+  lateral_exploration_weight: 0.0
+  racing_line_error_penalty: 0.18
+  racing_line_error_scale: 1.5
+  target_offset_penalty: 0.10
+  target_offset_error_scale: 0.5
+  target_offset_change_penalty: 0.04
+  apex_curvature_threshold: 0.015
+  apex_curvature_full: 0.06
+  apex_lookahead_distances: [0.0, 20.0, 45.0, 70.0]
+  corner_line_error_penalty: 0.35
+  apex_line_reward_weight: 0.16
+  apex_speed_reward_weight: 0.08
+  apex_boundary_margin: 1.2
+  apex_boundary_penalty: 0.25
+  safe_speed_progress_weight: 0.5
+  safe_speed_boundary_margin: 1.5
+  corner_smoothing_window: 11
+  corner_curvature_source: raceline
+  corner_curvature_threshold: 0.003
+  corner_merge_gap: 25.0
+  corner_segment_min_length: 20.0
+  corner_segment_min_heading_change: 0.20
+  corner_exit_clearance: 40.0
+  corner_max_exit_clearance: 130.0
+  corner_min_distance_fraction: 0.90
+  corner_min_heading_fraction: 0.80
+  corner_exit_max_heading_error: 0.15
+  corner_exit_min_boundary_margin: 0.75
+  corner_quality_boundary_margin: 1.2
+  corner_completion_base_bonus: 200.0
+  corner_heading_bonus_weight: 100.0
+  corner_distance_bonus_weight: 100.0
+  corner_apex_bonus_weight: 150.0
+  corner_speed_bonus_weight: 150.0
+  frontier_clear_bonus: 300.0
+  frontier_progress_weight: 2.0
+  frontier_shortfall_penalty: 500.0
+  frontier_shortfall_scale_m: 150.0
+  positive_reward_progress_distance: 0.20
+  stationary_penalty_per_step: 0.25
+  stall_progress_threshold: 0.01
+  stall_timeout: 4.0
+  stall_terminal_penalty: 600.0
+  time_penalty_per_step: 0.015
+  offtrack_penalty: 20.0
+  offtrack_terminal_penalty: 400.0
+  offtrack_remaining_lap_penalty: 800.0
+  offtrack_speed_penalty: 0.0
+  offtrack_kinetic_penalty: 1500.0
+  offtrack_corner_penalty: 400.0
+  curb_penalty_scale: 1.5
+  curb_high_speed_penalty_scale: 1.0
+  curb_near_boundary_margin: 1.0
+  curb_near_boundary_penalty_scale: 2.0
+  curb_overuse_fraction_limit: 0.03
+  curb_overuse_penalty_scale: 8.0
+  curb_overuse_penalty_cap: 1.5
+  curb_overuse_terminal_penalty: 120.0
+  curb_streak_time_limit: 0.35
+  curb_streak_penalty_scale: 4.0
+  curb_streak_penalty_cap: 2.0
+  curb_streak_terminal_penalty: 50.0
+  instability_penalty: 8.0
+  excessive_control_penalty: 0.015
+  longitudinal_action_change_penalty: 0.025
+  corner_speed_cap_margin_fraction: 0.08
+  corner_overspeed_penalty_weight: 3.0
+  corner_controlled_braking_reward_weight: 0.60
+  corner_braking_target_decel: 6.0
+  corner_braking_max_decel: 10.0
+  corner_braking_max_command: 0.75
+  corner_excessive_braking_penalty_weight: 1.0
+  corner_min_speed_cap_fraction: 0.72
+  corner_underspeed_penalty_weight: 0.35
+  corner_braking_reward_scale: 0.0
+  trail_braking_lookahead_m: 350.0
+  trail_braking_reserve_m: 45.0
+  trail_braking_taper_exponent: 0.80
+  trail_braking_max_reference: 0.70
+  trail_braking_speed_margin_fraction: 0.01
+  trail_braking_alignment_reward_weight: 0.35
+  trail_braking_missing_penalty_weight: 1.25
+  trail_braking_excess_reference_penalty_weight: 0.75
+  completion_bonus: 1000.0
+  timeout_penalty: 500.0
+
+termination:
+  start_finish_s: 0.0
+  minimum_lap_fraction: 0.95

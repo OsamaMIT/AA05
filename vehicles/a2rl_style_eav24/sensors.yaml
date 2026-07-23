@@ -1,0 +1,46 @@
+sensors:
+  sensor_stack_public:
+    cameras:
+      count:
+        value: 7
+        source: public
+      model:
+        value: "Sony IMX728"
+        source: public
+      coverage:
+        value: "360 degree"
+        source: public
+    radars:
+      count:
+        value: 4
+        source: public
+      model:
+        value: "ZF ProWave"
+        source: public
+    lidars:
+      count:
+        value: 3
+        source: public
+      model:
+        value: "Seyond Falcon Kinetic FK1 / Falcon Kinetic family"
+        source: public
+    gps:
+      enabled:
+        value: true
+        source: public
+    compute:
+      model:
+        value: "Neousys RGS-8805GC"
+        source: public
+  simulation_initial_mode:
+    use_ground_truth_state: true
+    simulate_sensor_noise: false
+  future_sensor_noise:
+    gps_position_std_m: 0.05
+    velocity_std_mps: 0.05
+    yaw_std_rad: 0.002
+    yaw_rate_std_rad_s: 0.005
+    lidar_latency_s: 0.05
+    camera_latency_s: 0.05
+    radar_latency_s: 0.03
+

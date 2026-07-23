@@ -1,0 +1,72 @@
+suspension:
+  exact_geometry_available: false
+  model_default: "load_transfer_approximation"
+  public_architecture:
+    front:
+      value: "pushrod suspension, torsion bar spring, adjustable dampers, third element"
+      source: public
+    rear:
+      value: "pushrod suspension, torsion bar / coil spring family, adjustable dampers, third element"
+      source: public
+  approximation:
+    front:
+      spring_rate_n_m:
+        value: 140000.0
+        source: estimate
+        range: [90000.0, 220000.0]
+      damper_bump_ns_m:
+        value: 9000.0
+        source: estimate
+      damper_rebound_ns_m:
+        value: 12000.0
+        source: estimate
+      antiroll_bar_n_m_per_rad:
+        value: 45000.0
+        source: estimate
+      third_element_rate_n_m:
+        value: 180000.0
+        source: estimate
+    rear:
+      spring_rate_n_m:
+        value: 160000.0
+        source: estimate
+        range: [100000.0, 250000.0]
+      damper_bump_ns_m:
+        value: 10000.0
+        source: estimate
+      damper_rebound_ns_m:
+        value: 14000.0
+        source: estimate
+      antiroll_bar_n_m_per_rad:
+        value: 55000.0
+        source: estimate
+      third_element_rate_n_m:
+        value: 200000.0
+        source: estimate
+  ride_height:
+    front_m:
+      value: 0.035
+      source: estimate
+    rear_m:
+      value: 0.045
+      source: estimate
+  roll_centers:
+    front_m:
+      value: 0.035
+      source: estimate
+    rear_m:
+      value: 0.060
+      source: estimate
+  load_transfer:
+    enabled: true
+    source: tunable
+    cg_height_m:
+      value: 0.280
+      source: estimate
+    roll_stiffness_front_fraction:
+      value: 0.48
+      source: estimate
+    roll_stiffness_rear_fraction:
+      value: 0.52
+      source: estimate
+

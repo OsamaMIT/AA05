@@ -167,6 +167,11 @@ def run(config_path: str | Path, backend_override: str | None = None) -> dict[st
             "mpc_tube_input_bound": lateral.last_tube_input_bound,
             "termination_reason": "",
         }
+        if bool(config.get("logging", {}).get("include_vehicle_telemetry", True)):
+            vehicle_telemetry = backend.get_telemetry()
+            vehicle_telemetry.off_track = not next_track_state.on_track
+            vehicle_telemetry.on_curb = next_track_state.on_curb
+            row.update(vehicle_telemetry.to_dict())
         rows.append(row)
 
         if lap_completed:

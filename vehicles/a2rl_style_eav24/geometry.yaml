@@ -1,0 +1,29 @@
+geometry:
+  length_m:
+    value: 5.233
+    source: proxy_sf19_sf23
+  wheelbase_m:
+    value: 3.115
+    source: proxy_sf19_sf23
+  width_m:
+    value: 1.910
+    source: proxy_sf19_sf23
+  height_m:
+    value: 0.960
+    source: proxy_sf19_sf23
+  front_track_m:
+    value: 1.600
+    source: estimate
+  rear_track_m:
+    value: 1.550
+    source: estimate
+  cg_to_front_axle_m:
+    value: 1.682
+    source: estimate
+  cg_to_rear_axle_m:
+    value: 1.433
+    source: estimate
+  cg_height_m:
+    value: 0.280
+    source: estimate
+

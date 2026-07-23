@@ -10,6 +10,10 @@ from chrono_a2rl.chrono_interface.dbw_model import DBWModel
 from chrono_a2rl.common.logging import get_logger
 from chrono_a2rl.common.math_utils import clamp, wrap_angle
 from chrono_a2rl.common.types import VehicleCommand, VehicleState
+from chrono_a2rl.vehicle.a2rl_vehicle_config import A2RLVehicleConfig
+from chrono_a2rl.vehicle.dynamic_bicycle import DynamicBicycleModel
+from chrono_a2rl.vehicle.kinematic_bicycle import KinematicBicycleModel
+from chrono_a2rl.vehicle.telemetry import VehicleTelemetry
 
 
 LOGGER = get_logger(__name__)
@@ -101,6 +105,19 @@ class MockChronoBackend:
         """Return current state."""
 
         return replace(self.state)
+
+    def get_telemetry(self) -> VehicleTelemetry:
+        """Return compatibility telemetry for the Level 0 comparison model."""
+
+        return VehicleTelemetry(
+            speed_mps=self.state.speed,
+            speed_kmh=self.state.speed * 3.6,
+            yaw_rate_rad_s=self.state.yaw_rate,
+            steering_actual_rad=self.state.steering_angle,
+            throttle_actual=self.state.throttle,
+            brake_actual=self.state.brake,
+            gear=self.state.gear,
+        )
 
     @property
     def last_control_saturated(self) -> bool:
@@ -254,6 +271,84 @@ class PyChronoKinematicBackend(MockChronoBackend):
         return quat_cls(math.cos(0.5 * yaw), 0.0, 0.0, math.sin(0.5 * yaw))
 
 
+class A2RLDynamicsBackend:
+    """Backend adapter for Level 1 and Level 2 non-Chrono vehicle models."""
+
+    def __init__(
+        self,
+        vehicle_config: dict[str, Any],
+        simulation_config: dict[str, Any],
+        *,
+        level: int = 2,
+    ) -> None:
+        self.config = A2RLVehicleConfig.from_component_config(vehicle_config)
+        if level == 1:
+            self.model = KinematicBicycleModel(self.config)
+            LOGGER.info("Using A2RL Level 1 constrained kinematic bicycle.")
+        else:
+            self.model = DynamicBicycleModel(
+                self.config,
+                physics_dt=float(simulation_config.get("physics_dt", 0.001)),
+            )
+            LOGGER.info("Using A2RL Level 2 dynamic bicycle backend.")
+
+    def reset(self, initial_state: VehicleState | None = None) -> VehicleState:
+        return self.model.reset(initial_state)
+
+    def step(self, command: VehicleCommand, dt: float) -> VehicleState:
+        return self.model.step(command, dt)
+
+    def get_state(self) -> VehicleState:
+        return self.model.get_state()
+
+    def get_telemetry(self) -> VehicleTelemetry:
+        return self.model.get_telemetry()
+
+    @property
+    def last_control_saturated(self) -> bool:
+        return self.model.last_control_saturated
+
+    def close(self) -> None:
+        return None
+
+
+class PyChronoA2RLForceBackend(A2RLDynamicsBackend):
+    """Level 3 Chrono rigid body driven by the shared force-limited model.
+
+    Tire, powertrain, aero, and actuator forces are resolved by the tested
+    Level 2 model. The resulting rigid-body state is mirrored into Chrono.
+    This deliberately stops short of claiming a private multibody suspension.
+    """
+
+    def __init__(
+        self,
+        vehicle_config: dict[str, Any],
+        simulation_config: dict[str, Any],
+    ) -> None:
+        chrono = _import_pychrono()
+        if chrono is None:
+            raise ImportError("pychrono is not installed")
+        super().__init__(vehicle_config, simulation_config, level=2)
+        from chrono_a2rl.chrono_interface.chrono_vehicle_factory import (
+            create_a2rl_chrono_body,
+        )
+
+        self.chrono = chrono
+        self.system, self.chrono_body = create_a2rl_chrono_body(chrono, self.config)
+        self.physics_dt = float(simulation_config.get("physics_dt", 0.001))
+        LOGGER.info("Using A2RL Level 3 PyChrono force-body backend.")
+
+    def reset(self, initial_state: VehicleState | None = None) -> VehicleState:
+        state = super().reset(initial_state)
+        self.chrono_body.sync(state)
+        return state
+
+    def step(self, command: VehicleCommand, dt: float) -> VehicleState:
+        state = super().step(command, dt)
+        self.chrono_body.sync(state)
+        return state
+
+
 class ChronoDirectBackend:
     """Stable backend facade for Project Chrono or mock simulation."""
 
@@ -265,6 +360,54 @@ class ChronoDirectBackend:
         self.vehicle_config = vehicle_config or {}
         self.simulation_config = simulation_config or {}
         requested_backend = str(self.simulation_config.get("backend", "mock")).lower()
+        level = int(self.vehicle_config.get("dynamics_level", 0))
+        mode = str(
+            self.simulation_config.get(
+                "chrono_mode",
+                self.vehicle_config.get("default_model", "kinematic"),
+            )
+        ).lower()
+        if "model_root" in self.vehicle_config and mode in {
+            "dynamic_bicycle",
+            "a2rl_dynamic",
+            "level2",
+        }:
+            self._backend = A2RLDynamicsBackend(
+                self.vehicle_config,
+                self.simulation_config,
+                level=max(level, 2),
+            )
+            return
+        if "model_root" in self.vehicle_config and mode in {
+            "constrained_kinematic",
+            "level1",
+        }:
+            self._backend = A2RLDynamicsBackend(
+                self.vehicle_config,
+                self.simulation_config,
+                level=1,
+            )
+            return
+        if (
+            requested_backend == "chrono"
+            and "model_root" in self.vehicle_config
+            and mode in {"a2rl_force_body", "dynamic_force", "level3"}
+        ):
+            try:
+                self._backend = PyChronoA2RLForceBackend(
+                    self.vehicle_config, self.simulation_config
+                )
+                return
+            except Exception as exc:
+                LOGGER.warning(
+                    "A2RL PyChrono force-body initialization failed (%s). "
+                    "Falling back to the Level 2 dynamic bicycle.",
+                    exc,
+                )
+                self._backend = A2RLDynamicsBackend(
+                    self.vehicle_config, self.simulation_config, level=2
+                )
+                return
         if requested_backend == "chrono":
             try:
                 self._backend = PyChronoKinematicBackend(self.vehicle_config, self.simulation_config)
@@ -285,6 +428,9 @@ class ChronoDirectBackend:
 
     def get_state(self) -> VehicleState:
         return self._backend.get_state()
+
+    def get_telemetry(self) -> VehicleTelemetry:
+        return self._backend.get_telemetry()
 
     @property
     def last_control_saturated(self) -> bool:

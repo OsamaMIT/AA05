@@ -1,0 +1,83 @@
+tires:
+  supplier:
+    value: "Yokohama Advan"
+    source: public
+  model_default: "friction_ellipse_with_linear_slip"
+  exact_tire_data_available: false
+  sizes:
+    front:
+      value: "270/620-R13"
+      source: proxy_sf19_sf23
+      width_m: 0.270
+      diameter_m: 0.620
+      radius_m: 0.310
+    rear:
+      value: "360/620-R13"
+      source: proxy_sf19_sf23
+      width_m: 0.360
+      diameter_m: 0.620
+      radius_m: 0.310
+  friction:
+    mu_peak_front:
+      value: 1.75
+      source: estimate
+      range: [1.45, 2.20]
+    mu_peak_rear:
+      value: 1.85
+      source: estimate
+      range: [1.50, 2.30]
+    mu_slide_front:
+      value: 1.45
+      source: estimate
+    mu_slide_rear:
+      value: 1.50
+      source: estimate
+    wet_mu_multiplier:
+      value: 0.60
+      source: tunable
+    cold_tire_mu_multiplier:
+      value: 0.85
+      source: tunable
+    hot_tire_mu_multiplier:
+      value: 0.95
+      source: tunable
+  stiffness:
+    cornering_stiffness_front_n_per_rad:
+      value: 110000.0
+      source: estimate
+      range: [80000.0, 160000.0]
+    cornering_stiffness_rear_n_per_rad:
+      value: 135000.0
+      source: estimate
+      range: [100000.0, 190000.0]
+    longitudinal_stiffness_front_n:
+      value: 100000.0
+      source: estimate
+    longitudinal_stiffness_rear_n:
+      value: 125000.0
+      source: estimate
+  load_sensitivity:
+    enabled: true
+    coefficient:
+      value: 0.12
+      source: estimate
+  combined_slip:
+    enabled: true
+    ellipse_exponent:
+      value: 2.0
+      source: estimate
+    safety_factor:
+      value: 0.92
+      source: tunable
+    formula: "(Fx/Fx_max)^2 + (Fy/Fy_max)^2 <= safety_factor^2"
+  slip_limits:
+    max_slip_angle_rad:
+      value: 0.20
+      source: estimate
+    warning_slip_angle_rad:
+      value: 0.12
+      source: estimate
+    max_slip_ratio:
+      value: 0.18
+      source: estimate
+

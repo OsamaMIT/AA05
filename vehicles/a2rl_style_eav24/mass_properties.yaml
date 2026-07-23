@@ -1,0 +1,27 @@
+mass_properties:
+  total_mass_kg:
+    value: 690.0
+    source: public
+  sprung_mass_kg:
+    value: 610.0
+    source: estimate
+  unsprung_mass_per_corner_kg:
+    value: 20.0
+    source: estimate
+  front_static_weight_fraction:
+    value: 0.46
+    source: estimate
+  cg_height_m:
+    value: 0.280
+    source: estimate
+  inertia_kgm2:
+    ix:
+      value: 260.0
+      source: estimate
+    iy:
+      value: 1200.0
+      source: estimate
+    iz:
+      value: 900.0
+      source: estimate
+

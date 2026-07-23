@@ -1,0 +1,75 @@
+actuators:
+  public_reported_decision_period_s:
+    value: 0.005
+    source: public
+  simulation_control_period_s:
+    value: 0.020
+    source: tunable
+  drive_by_wire:
+    enabled: true
+    source: public
+  steering:
+    enabled: true
+    source: public
+    max_angle_rad:
+      value: 0.35
+      source: estimate
+      range: [0.25, 0.45]
+    max_rate_rad_s:
+      value: 4.0
+      source: estimate
+    delay_s:
+      value: 0.02
+      source: estimate
+    first_order_response_time_s:
+      value: 0.04
+      source: estimate
+  throttle:
+    enabled: true
+    source: public
+    min_value:
+      value: 0.0
+      source: public
+    max_value:
+      value: 1.0
+      source: public
+    rate_limit_per_s:
+      value: 5.0
+      source: estimate
+    delay_s:
+      value: 0.03
+      source: estimate
+    first_order_response_time_s:
+      value: 0.08
+      source: estimate
+  brake:
+    enabled: true
+    source: public
+    min_value:
+      value: 0.0
+      source: public
+    max_value:
+      value: 1.0
+      source: public
+    rate_limit_per_s:
+      value: 8.0
+      source: estimate
+    delay_s:
+      value: 0.02
+      source: estimate
+    first_order_response_time_s:
+      value: 0.06
+      source: estimate
+  gear_shift:
+    enabled: true
+    source: public
+    shift_time_s:
+      value: 0.05
+      source: estimate
+  emergency_stop:
+    enabled: true
+    source: public
+    remote_stop_supported:
+      value: true
+      source: public
+

@@ -1,0 +1,39 @@
+name: a2rl_dynamic_vehicle_yas_marina
+description: Existing raceline and speed-profile controller on the Level 2 EAV24 approximation.
+component_configs:
+  vehicle: configs/vehicle/a2rl_style_eav24.yaml
+  track: configs/track/yas_marina.yaml
+  controller:
+    lateral: configs/controller/mpc_lateral.yaml
+    speed: configs/controller/speed_pid.yaml
+  simulation: configs/simulation/chrono_default.yaml
+
+simulation:
+  backend: mock
+  chrono_mode: dynamic_bicycle
+  physics_dt: 0.001
+  control_dt: 0.02
+  max_episode_time: 300.0
+  initial_speed: 12.0
+  max_offtrack_steps: 20
+  max_abs_yaw_rate: 4.5
+
+speed_profile:
+  curvature_source: raceline
+  min_speed: 8.0
+  max_speed: 30.0
+  max_lateral_accel: 5.0
+  max_accel: 4.0
+  max_decel: 8.0
+  smoothing_window: 11
+
+logging:
+  log_dir: logs
+  save_csv: true
+  include_vehicle_telemetry: true
+
+termination:
+  start_finish_s: 0.0
+  minimum_lap_fraction: 0.95
+  stop_on_offtrack: true
+  stop_on_instability: true

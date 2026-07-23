@@ -1,0 +1,93 @@
+vehicle:
+  name: "a2rl_style_eav24_approx"
+  description: "Approximate A2RL Dallara EAV24 / SF23-style autonomous formula car"
+  exact_private_parameters_available: false
+
+  public_identity:
+    base_chassis:
+      value: "Dallara Super Formula SF23 / EAV24"
+      source: public
+    vehicle_type:
+      value: "open-wheel high-downforce autonomous formula race car"
+      source: public
+    autonomous_stack:
+      value: true
+      source: public
+
+  mass:
+    total_kg:
+      value: 690.0
+      source: public
+      note: "Reported A2RL autonomized SF23 mass"
+    sprung_mass_kg:
+      value: 610.0
+      source: estimate
+    unsprung_mass_total_kg:
+      value: 80.0
+      source: estimate
+    front_static_weight_fraction:
+      value: 0.46
+      source: estimate
+      range: [0.44, 0.48]
+    rear_static_weight_fraction:
+      value: 0.54
+      source: estimate
+      range: [0.52, 0.56]
+    autonomous_stack_mass_kg:
+      value: 65.0
+      source: estimate
+
+  geometry:
+    length_m:
+      value: 5.233
+      source: proxy_sf19_sf23
+    width_m:
+      value: 1.910
+      source: proxy_sf19_sf23
+    height_m:
+      value: 0.960
+      source: proxy_sf19_sf23
+    wheelbase_m:
+      value: 3.115
+      source: proxy_sf19_sf23
+    track_front_m:
+      value: 1.600
+      source: estimate
+      range: [1.55, 1.70]
+    track_rear_m:
+      value: 1.550
+      source: estimate
+      range: [1.50, 1.65]
+    cg_height_m:
+      value: 0.280
+      source: estimate
+      range: [0.240, 0.330]
+    cg_to_front_axle_m:
+      value: 1.682
+      source: estimate
+      note: "Derived from the estimated static weight distribution"
+    cg_to_rear_axle_m:
+      value: 1.433
+      source: estimate
+    front_overhang_m:
+      value: 1.05
+      source: estimate
+    rear_overhang_m:
+      value: 1.07
+      source: estimate
+
+  inertia:
+    ix_kgm2:
+      value: 260.0
+      source: estimate
+      range: [180.0, 380.0]
+    iy_kgm2:
+      value: 1200.0
+      source: estimate
+      range: [900.0, 1600.0]
+    iz_kgm2:
+      value: 900.0
+      source: estimate
+      range: [700.0, 1200.0]
+    note: "Tune yaw inertia against measured steering and yaw-rate transients"
+

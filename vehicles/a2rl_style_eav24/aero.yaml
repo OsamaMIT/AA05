@@ -1,0 +1,36 @@
+aero:
+  enabled: true
+  model: "quadratic_drag_downforce"
+  air_density_kg_m3:
+    value: 1.18
+    source: tunable
+    note: "Approximate hot UAE track-day density"
+  cda_total:
+    value: 1.15
+    source: estimate
+    range: [0.80, 1.60]
+  cla_total:
+    value: 4.50
+    source: estimate
+    range: [2.50, 6.50]
+  aero_balance_front:
+    value: 0.45
+    source: estimate
+    range: [0.40, 0.50]
+  aero_balance_rear:
+    value: 0.55
+    source: estimate
+    range: [0.50, 0.60]
+  max_downforce_n:
+    value: 22000.0
+    source: tunable
+  pitch_sensitivity:
+    enabled: false
+    source: tunable
+  yaw_sensitivity:
+    enabled: false
+    source: tunable
+  formulas:
+    drag_force: "F_drag = 0.5 * rho * CdA * v^2"
+    downforce: "F_down = 0.5 * rho * ClA * v^2"
+

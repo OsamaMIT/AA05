@@ -1,0 +1,7 @@
+name: a2rl_style_eav24_approx
+description: Configurable A2RL Dallara EAV24 / SF23-style vehicle approximation.
+model_root: vehicles/a2rl_style_eav24
+dynamics_level: 2
+default_model: dynamic_bicycle
+exact_private_parameters_available: false
+

@@ -37,6 +37,24 @@ replays run at 4x speed and come from the same deterministic evaluation log.
 |:---:|:---:|
 | ![Best Yas Marina lap, full-track camera](docs/assets/replays/best_lap_full.gif) | ![Best Yas Marina lap, follow camera](docs/assets/replays/best_lap_follow.gif) |
 
+## A2RL Vehicle Dynamics
+
+The historical kinematic backend remains available for fast baseline
+comparison. A separate EAV24/SF23-style Level 2 model adds tire saturation,
+combined slip, speed-dependent aero, load transfer, rear-drive power limits,
+brake bias, yaw dynamics, and delayed/rate-limited DBW actuators:
+
+```bash
+python3 scripts/run_mpc_lap.py \
+  --config configs/experiments/a2rl_dynamic_vehicle_yas_marina.yaml
+python3 scripts/validate_a2rl_vehicle_model.py
+```
+
+This is a configurable public/proxy/estimate model, not an exact private A2RL
+vehicle. See [A2RL vehicle model](docs/A2RL_VEHICLE_MODEL.md),
+[vehicle dynamics](docs/VEHICLE_DYNAMICS.md), and
+[calibration](docs/CALIBRATION.md).
+
 ## Installation
 
 ```bash

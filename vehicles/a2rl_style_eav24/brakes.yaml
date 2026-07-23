@@ -1,0 +1,48 @@
+brakes:
+  supplier:
+    value: "Brembo"
+    source: public
+  disc_material:
+    value: "carbon"
+    source: public
+  calipers:
+    value: "Brembo carbon brake calipers"
+    source: public
+  activation:
+    value: "electro-hydraulic drive-by-wire"
+    source: public
+  independent_corner_braking:
+    enabled: true
+    source: public
+    note: "Model currently resolves forces per axle"
+  max_decel_mps2:
+    value: 20.0
+    source: estimate
+    range: [14.0, 25.0]
+  brake_bias_front:
+    value: 0.58
+    source: estimate
+    range: [0.54, 0.62]
+  response:
+    response_time_s:
+      value: 0.06
+      source: estimate
+    delay_s:
+      value: 0.02
+      source: estimate
+    rate_limit_per_s:
+      value: 8.0
+      source: estimate
+  thermal_model:
+    enabled: false
+    source: tunable
+  abs_or_lockup_guard:
+    enabled: true
+    source: tunable
+    lockup_slip_threshold:
+      value: 0.15
+      source: estimate
+    release_gain:
+      value: 0.5
+      source: tunable
+

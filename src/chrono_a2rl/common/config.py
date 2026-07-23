@@ -85,6 +85,12 @@ def load_experiment_config(path: str | Path) -> dict[str, Any]:
     vehicle_ref = component_refs.get("vehicle")
     if vehicle_ref:
         merged["vehicle"] = load_yaml(resolve_path(vehicle_ref, experiment_path.parent))
+        if "model_root" in merged["vehicle"]:
+            from chrono_a2rl.vehicle.a2rl_vehicle_config import (
+                expand_a2rl_component_config,
+            )
+
+            merged["vehicle"] = expand_a2rl_component_config(merged["vehicle"])
 
     track_ref = component_refs.get("track")
     if track_ref:

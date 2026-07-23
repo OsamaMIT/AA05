@@ -1,0 +1,69 @@
+powertrain:
+  engine:
+    type:
+      value: "turbocharged 2.0 L inline-four"
+      source: public
+    displacement_l:
+      value: 2.0
+      source: public
+    max_power_kw:
+      value: 410.0
+      source: public
+    max_torque_nm:
+      value: 540.0
+      source: proxy_sf19_sf23
+    idle_rpm:
+      value: 2500.0
+      source: estimate
+    max_rpm:
+      value: 9000.0
+      source: estimate
+    turbo_lag_s:
+      value: 0.15
+      source: estimate
+  drivetrain:
+    layout:
+      value: "rear_wheel_drive"
+      source: public
+    drivetrain_efficiency:
+      value: 0.92
+      source: estimate
+    traction_control:
+      enabled: true
+      source: tunable
+  gearbox:
+    supplier_or_type:
+      value: "3MO six-speed gearbox"
+      source: public
+    forward_gears:
+      value: 6
+      source: public
+    reverse_gears:
+      value: 1
+      source: public
+    shift_time_s:
+      value: 0.05
+      source: estimate
+    auto_shift:
+      enabled: true
+      source: tunable
+    gear_ratios:
+      source: estimate
+      values: [3.00, 2.20, 1.70, 1.35, 1.12, 0.95]
+    final_drive:
+      value: 3.20
+      source: estimate
+  longitudinal_limits:
+    max_speed_mps:
+      value: 83.333
+      source: public
+    max_accel_low_speed_mps2:
+      value: 8.5
+      source: estimate
+    max_accel_high_speed_mps2:
+      value: 4.0
+      source: estimate
+  rolling_resistance_coefficient:
+    value: 0.015
+    source: estimate
+

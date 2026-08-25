@@ -30,10 +30,10 @@ emergency_brake
 
 ## Timing Model
 
-Training mode is synchronous direct Chrono stepping:
+Training mode is synchronous in-process AVLite bridge stepping:
 
 ```text
-policy/controller -> backend.step(command, dt) -> state
+policy/controller -> A2RLChronoWorldBridge -> Chrono plant -> state
 ```
 
 Runtime mode is event-driven ROS messaging:

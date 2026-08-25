@@ -9,7 +9,7 @@ import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 
-from chrono_a2rl.chrono_interface.direct_backend import ChronoDirectBackend
+from chrono_a2rl.chrono_interface.backend_factory import create_simulation_backend
 from chrono_a2rl.chrono_interface.reset_manager import initial_state_from_track
 from chrono_a2rl.common.config import load_experiment_config
 from chrono_a2rl.common.math_utils import clamp
@@ -159,7 +159,7 @@ class ChronoRacingPlannerEnv(gym.Env):
             shape=(LONGITUDINAL_OBSERVATION_SIZE,),
             dtype=np.float32,
         )
-        self.backend = ChronoDirectBackend(self.vehicle, self.simulation)
+        self.backend = create_simulation_backend(self.config)
         self.lateral = LateralMPCController(self.config["controller"].get("lateral", {}), self.vehicle)
         self.speed = SpeedPIDController(self.config["controller"].get("speed", {}))
         self.supervisor = SafetySupervisor(self.vehicle, self.simulation)

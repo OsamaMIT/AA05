@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run one MPC-controlled lap with ChronoDirectBackend or the mock fallback."""
+"""Run one MPC-controlled lap through the AVLite Chrono world bridge."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ SRC = ROOT / "src"
 if str(SRC) not in sys.path:
     sys.path.insert(0, str(SRC))
 
-from chrono_a2rl.chrono_interface.direct_backend import ChronoDirectBackend
+from chrono_a2rl.chrono_interface.backend_factory import create_simulation_backend
 from chrono_a2rl.chrono_interface.reset_manager import initial_state_from_track
 from chrono_a2rl.common.config import load_experiment_config
 from chrono_a2rl.common.logging import get_logger
@@ -55,7 +55,7 @@ def run(config_path: str | Path, backend_override: str | None = None) -> dict[st
     initial_speed = float(simulation.get("initial_speed", 3.0))
     max_offtrack_steps = int(simulation.get("max_offtrack_steps", 20))
 
-    backend = ChronoDirectBackend(vehicle, simulation)
+    backend = create_simulation_backend(config)
     initial_state = initial_state_from_track(track, s=0.0, speed=initial_speed)
     state = backend.reset(initial_state)
     episode_start_time = float(state.sim_time)

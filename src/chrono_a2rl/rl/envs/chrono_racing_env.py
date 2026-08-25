@@ -1,4 +1,4 @@
-"""Gymnasium environment wrapping the MPC baseline and direct backend."""
+"""Gymnasium environment wrapping the racing stack through AVLite."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ import gymnasium as gym
 import numpy as np
 from gymnasium import spaces
 
-from chrono_a2rl.chrono_interface.direct_backend import ChronoDirectBackend
+from chrono_a2rl.chrono_interface.backend_factory import create_simulation_backend
 from chrono_a2rl.common.config import load_experiment_config
 from chrono_a2rl.common.types import ControllerReference, VehicleCommand
 from chrono_a2rl.control.mpc_lateral import LateralMPCController
@@ -64,7 +64,7 @@ class ChronoRacingEnv(gym.Env):
             shape=(11,),
             dtype=np.float32,
         )
-        self.backend = ChronoDirectBackend(self.vehicle, self.simulation)
+        self.backend = create_simulation_backend(self.config)
         self.lateral = LateralMPCController(self.config["controller"].get("lateral", {}), self.vehicle)
         self.speed = SpeedPIDController(self.config["controller"].get("speed", {}))
         self.supervisor = SafetySupervisor(self.vehicle, self.simulation)

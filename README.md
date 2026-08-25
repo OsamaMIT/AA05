@@ -1,22 +1,50 @@
-# Chrono A2RL Training
+# AVLite A2RL Chrono Training
 
-Research scaffold for an A2RL-style autonomous racing training stack:
+AVLite-native research stack for A2RL-style autonomous racing:
 
 ```text
-Project Chrono direct backend
-    -> A2RL-style vehicle model
-    -> flat Yas Marina track from TUMFTM racetrack-database
-    -> DBW-style command interface
-    -> MPC controller baseline
-    -> Gymnasium environment
-    -> Stable-Baselines3 high-level RL policy
-    -> ROS 2 runtime integration later
+AVLite SyncExecuter and strategy contracts
+    -> TUMFTM Yas Marina GlobalPlan + RaceMap
+    -> A2RL MPC/PID ControlStrategy
+    -> A2RL Chrono WorldBridge
+    -> configurable A2RL-style vehicle model
+    -> Gymnasium adapter over the same WorldBridge
+    -> Stable-Baselines3 longitudinal policy
 ```
 
 The repository is useful before Project Chrono is installed. If Chrono data or
-bindings are unavailable, `ChronoDirectBackend` uses a mock kinematic bicycle
-simulator. Yas Marina is processed from `TUMFTM/racetrack-database`; the
+bindings are unavailable, `A2RLChronoWorldBridge` uses the repository's mock
+vehicle plant. Chrono-specific imports remain isolated behind that bridge.
+Yas Marina is processed from `TUMFTM/racetrack-database`; the
 synthetic oval is now only a fallback if those processed files are removed.
+
+## AVLite Stack
+
+The [`avlite_a2rl` community plugin](src/avlite_a2rl) follows AVLite's standard
+plugin model and registers five repository strategies:
+
+```text
+A2RLGlobalRacePlanner       AVLite GlobalPlannerStrategy
+A2RLReferenceLocalPlanner  AVLite LocalPlanningStrategy
+A2RLMPCControlStrategy     AVLite ControlStrategy
+A2RLChronoWorldBridge      AVLite WorldBridge
+A2RLLapTelemetryTask       AVLite TaskStrategy
+```
+
+The native profile and data live in `avlite_profiles/` and `avlite_data/`.
+Validate the assembled upstream AVLite factory, run a lap, or open AVLite's
+graphical stack inspector with:
+
+```bash
+aa stack --validate --backend mock
+aa stack --backend chrono
+aa stack --ui
+```
+
+`aa train`, `aa eval`, `aa watch`, and the MPC runner all instantiate their
+simulation through the same AVLite world bridge. The Gymnasium adapter avoids
+AVLite UI/ROS transport in the high-throughput SB3 loop while preserving the
+canonical world contract.
 
 The vehicle profile is based on public A2RL EAV24/EAV25 information: Dallara
 autonomous Super Formula platform, K20C1-based turbo engine, 3MO 6-speed
@@ -78,6 +106,7 @@ aa train
 aa eval
 aa watch
 aa optimize
+aa stack
 ```
 
 ## Run Tests
@@ -87,6 +116,7 @@ python3 -m pytest
 ```
 
 The suite passes without Chrono, Stable-Baselines3, or external track data.
+AVLite itself is a required base dependency.
 
 ## Run The MPC Lap With Mock Backend
 
@@ -96,7 +126,8 @@ python3 scripts/run_mpc_lap.py --config configs/experiments/mpc_yas_marina_flat.
 
 The default Yas Marina track comes from TUMFTM `tracks/YasMarina.csv` with
 `racelines/YasMarina.csv` as the optional raceline. Logs and metrics are written
-under `logs/`.
+under `logs/`. This runner uses the backend-shaped Gym adapter over
+`A2RLChronoWorldBridge`; it no longer opens `ChronoDirectBackend` directly.
 
 The MPC-only experiment intentionally keeps a conservative target speed profile.
 The default controller is the fast tube-aware pure-pursuit raceline tracker.
@@ -114,8 +145,9 @@ python3 scripts/run_mpc_lap.py --config configs/experiments/mpc_yas_marina_flat.
 
 The first Chrono mode is `PyChronoKinematicBackend`: it creates a Chrono system,
 flat ground, and chassis body while preserving the scaffold kinematic vehicle
-model. This proves the direct Chrono training path and keeps the controller/RL
-interfaces stable. A full `pychrono.vehicle` model is the next fidelity upgrade.
+model. This proves the Chrono plant behind `A2RLChronoWorldBridge` while
+keeping the AVLite/controller/RL interfaces stable. A full `pychrono.vehicle`
+model is the next fidelity upgrade.
 
 ## Process Yas Marina Track Data
 
@@ -125,6 +157,7 @@ processed Yas Marina artifacts are stored under `tracks/yas_marina/processed/`.
 ```bash
 git clone https://github.com/TUMFTM/racetrack-database /path/to/racetrack-database
 python3 scripts/process_track.py --tumftm-root /path/to/racetrack-database
+python3 scripts/export_avlite_assets.py
 python3 scripts/plot_track.py
 ```
 
@@ -194,18 +227,22 @@ Track limits use TUMFTM left/right widths. Level-1 curbs are flat semantic
 1-meter edge zones along both sides of the full loop. They do not alter physics,
 but MPC/RL logs and metrics report curb usage and RL rewards can penalize it.
 
-## Chrono Backend Later
+## Chrono Boundary
 
-Training code should continue to call:
+AVLite and Gym code use these two public boundaries:
 
 ```python
-ChronoDirectBackend.reset()
-ChronoDirectBackend.step(command, dt)
-ChronoDirectBackend.get_state()
+A2RLChronoWorldBridge.control_ego_state(command, dt)
+A2RLChronoWorldBridge.get_ego_state()
+
+AVLiteBackendAdapter.reset(initial_state)
+AVLiteBackendAdapter.step(vehicle_command, dt)
 ```
 
 Real Project Chrono initialization, vehicle spawning, state extraction, and
-command application belong only in `src/chrono_a2rl/chrono_interface/`.
+command application remain in `chrono_interface/` behind the world bridge.
+`ChronoDirectBackend` is now an internal plant facade and an explicit legacy
+diagnostic path, not the application orchestration layer.
 
 ## Main RL Commands
 
@@ -402,6 +439,8 @@ aa train-speed --config configs/experiments/rl_speed_policy_yas_marina.yaml
   profile exists for fine-tuning, but it is not yet a nonlinear tire-force MPC.
 - ROS 2 runtime integration is documented but intentionally not in the training
   loop.
+- AVLite `0.5.x` is the supported API line; validate future releases with
+  `aa stack --validate` before widening the dependency bound.
 
 ## Roadmap
 
@@ -410,4 +449,4 @@ aa train-speed --config configs/experiments/rl_speed_policy_yas_marina.yaml
 3. Upgrade the linear Tube MPC prediction model to dynamic tire and aero states.
 4. Add physical curb and friction zones.
 5. Train and evaluate the high-level SB3 profile-residual policy.
-6. Add ROS 2 runtime bridge after the direct training loop is stable.
+6. Add a ROS 2 `WorldBridge` plugin after synchronous AVLite training is stable.

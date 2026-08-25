@@ -27,11 +27,17 @@ to produce every steering command:
 TUMFTM speed profile -> speed PID -> base throttle/brake
 PPO -> bounded pedal residual
 TUMFTM raceline -> lateral MPC -> steering
-combined pedals + steering -> safety supervisor -> DBW -> Chrono/mock backend
+combined pedals + steering -> safety supervisor -> DBW
+DBW -> AVLiteBackendAdapter -> A2RLChronoWorldBridge -> Chrono/mock plant
 ```
 
 The curvature speed profile is authoritative. PPO observes actual and target
 speed and is rewarded for reducing their difference.
+
+The Gym environment is the AVLite training application boundary. It does not
+run a GUI or ROS transport per worker; every reset and step crosses AVLite's
+`WorldBridge`, while racing reward and controller calculations remain direct
+Python calls for vectorized throughput.
 
 ## Observation
 
@@ -177,7 +183,7 @@ frontier progress, and corner outcomes.
 
 ## Current Limitations
 
-The mock and current Chrono scaffold backends use kinematic longitudinal
+The mock and current Chrono scaffold plants use kinematic longitudinal
 dynamics. The learned pedal timing must be retrained or fine-tuned when the
 backend gains high-fidelity tire, aero, powertrain, and brake behavior. Lateral
 MPC tuning also limits the maximum speed that can be held on the fixed raceline.

@@ -48,8 +48,8 @@ The mock backend's `drag_coefficient` is an aggregate speed-squared loss in
 
 `PyChronoKinematicBackend` creates a Chrono system, fixed ground, and chassis
 body using the A2RL-style mass/dimensions. It mirrors the kinematic state into
-Chrono each step. This confirms the direct Chrono path while preserving the
-controller and RL interfaces.
+Chrono each step. `A2RLChronoWorldBridge` owns this plant boundary while
+preserving the AVLite controller and RL interfaces.
 
 The next fidelity upgrade is to replace this internal chassis with a full
 `pychrono.vehicle` model using the same public A2RL profile as the starting

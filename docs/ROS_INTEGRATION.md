@@ -1,17 +1,20 @@
 # ROS 2 Integration
 
-ROS 2 is deferred until the base direct-training stack is stable.
+ROS 2 is deferred until the AVLite/Chrono training stack is stable. It will be
+implemented as an alternate AVLite `WorldBridge`, not inserted between SB3 and
+the synchronous Chrono bridge.
 
 ## Modes
 
 ```text
-training mode = synchronous direct Chrono stepping
-runtime mode = event-driven ROS topics with labeled updates
+training mode = synchronous AVLite Chrono WorldBridge stepping
+runtime mode = event-driven AVLite ROS WorldBridge with labeled updates
 ```
 
-Training mode calls Chrono directly for deterministic reset/step loops and
-high-throughput data collection. Runtime mode will publish simulator updates
-and receive driver commands through ROS topics or services.
+Training mode calls the in-process Chrono plant through AVLite's world contract
+for deterministic reset/step loops and high-throughput data collection.
+Runtime mode will publish simulator updates and receive driver commands through
+ROS topics or services behind a different bridge implementation.
 
 ## Future Simulator Update
 

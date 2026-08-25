@@ -24,6 +24,10 @@ The committed Yas Marina processed files are derived from
 `e59595d1f3573b30d1ded6a08984935b957688e0`, using
 `tracks/YasMarina.csv` and `racelines/YasMarina.csv`.
 
+`scripts/export_avlite_assets.py` converts those canonical files into the
+AVLite `GlobalPlan` and `RaceMap` under `avlite_data/`. Regenerate the AVLite
+assets after changing track geometry or the configured speed profile.
+
 ## Geometry
 
 `TrackGeometry` stores a closed loop without a duplicated final point. It

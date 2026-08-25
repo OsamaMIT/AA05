@@ -1,5 +1,7 @@
 name: mpc_yas_marina_flat
 description: MPC baseline on flat Yas Marina data, falling back to a synthetic oval when data is absent.
+avlite:
+  enabled: true
 component_configs:
   vehicle: configs/vehicle/a2rl_style_sf23.yaml
   track: configs/track/yas_marina.yaml

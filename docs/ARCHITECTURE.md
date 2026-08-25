@@ -1,70 +1,78 @@
 # Architecture
 
+AVLite owns stack assembly, execution contracts, plugin discovery, maps, plans,
+and world integration. Racing-specific physics and algorithms remain small,
+testable implementations behind those contracts.
+
 ```text
-configs + vehicle params
-    -> track loader and generated/optimized speed profile
-    -> ChronoDirectBackend
-    -> DBW model and safety supervisor
-    -> fast raceline steering + RL throttle/brake
-    -> lap runner and metrics
-    -> Gymnasium speed-policy wrapper
+AVLite SyncExecuter
+  c20 A2RLGlobalRacePlanner -> AVLite GlobalPlan
+  c20 A2RLReferenceLocalPlanner -> AVLite LocalPlan
+  c30 A2RLMPCControlStrategy -> A2RLAckermannCommand
+  c40 A2RLChronoWorldBridge -> Chrono/mock plant
+  c40 A2RLLapTelemetryTask -> CSV and metrics
 ```
 
-## Direct Chrono Training
+The portable assembly is defined by:
 
-Training calls the simulator directly because policy optimization needs
-deterministic reset/step control, high throughput, and simple failure handling.
-ROS is excellent for runtime integration, but it adds event timing and transport
-concerns that are unnecessary in the critical training loop.
-
-## Isolation Boundaries
-
-- `chrono_interface/` owns all Chrono-specific imports and backend details.
-- `track/` owns geometry, Frenet projection, curbs, and speed profiles.
-- `control/` owns controller interfaces, MPC/PID implementations, and safety.
-- `rl/` owns Gymnasium observations, rewards, environments, and SB3 training.
-- `evaluation/` owns metrics, replay, repeatable-profile optimization, and
-  future disturbance testing.
-
-## RL Longitudinal Mode
-
-The planner environment fixes the geometric Yas Marina TUMFTM raceline and lets
-RL output one signed longitudinal action. Positive values command throttle,
-negative values command brake, and values inside the deadband coast. Lateral
-The default training profile uses tube-aware pure pursuit for steering while
-DBW applies actuator lag and physical output limits. The separate full Tube MPC
-profile uses a constrained OSQP nominal controller and LQR ancillary feedback
-for later fine-tuning and evaluation.
-
-The curvature-derived or optimized raceline speed profile is tracked by the
-speed PID. PPO receives the profile as preview information and supplies only a
-small guarded pedal residual, so it can fine-tune acceleration and braking
-without replacing baseline longitudinal control or steering.
-
-## Current Backend
-
-`ChronoDirectBackend` always exposes the stable API:
-
-```python
-reset(initial_state=None)
-step(command, dt)
-get_state()
-close()
+```text
+avlite_profiles/a2rl_chrono_yas_marina.yaml
+avlite_data/yas_marina_a2rl_global_plan.json
+avlite_data/yas_marina_a2rl.map.json
+src/avlite_a2rl/
 ```
 
-When `backend: chrono`, `ChronoDirectBackend` first tries
-`PyChronoKinematicBackend`. That backend creates a PyChrono system, fixed flat
-ground, and chassis body, then mirrors the scaffold kinematic vehicle state into
-Chrono each step. If PyChrono cannot initialize, it falls back to
-`MockChronoBackend`.
+## Layer Mapping
 
-The next fidelity step is replacing the kinematic Chrono body internals with a
-full `pychrono.vehicle` wheeled vehicle while preserving the same backend API.
+| Racing concern | AVLite owner | Repository implementation |
+| --- | --- | --- |
+| Track map and limits | `Map` / `RaceMap` | TUMFTM asset exporter |
+| Geometric route and speed | `GlobalPlannerStrategy` | `A2RLGlobalRacePlanner` |
+| Active reference | `LocalPlanningStrategy` | `A2RLReferenceLocalPlanner` |
+| Steering and speed tracking | `ControlStrategy` | `A2RLMPCControlStrategy` |
+| Simulation and sensors | `WorldBridge` | `A2RLChronoWorldBridge` |
+| Lap supervision and logs | `TaskStrategy` | `A2RLLapTelemetryTask` |
+| PPO rollouts | Gymnasium application adapter | `AVLiteBackendAdapter` |
 
-## Vehicle Profile
+## Training Path
 
-The vehicle configuration is public-reference A2RL EAV24/EAV25 style. It
-records the public Dallara autonomous Super Formula platform, K20C1-based
-engine, 3MO gearbox, Brembo electro-hydraulic carbon brakes, Yokohama Advan
-tires, and sensor/compute suite. Exact dynamics values are explicitly marked as
-simulation estimates.
+SB3 needs many independent, synchronous Gymnasium environments. Each worker
+therefore uses a lightweight backend-shaped adapter over the same AVLite
+`WorldBridge` rather than constructing the graphical app or ROS transport:
+
+```text
+Stable-Baselines3 PPO
+  -> ChronoRacingPlannerEnv
+  -> MPC/PID + safety supervisor
+  -> AVLiteBackendAdapter
+  -> A2RLChronoWorldBridge
+  -> ChronoDirectBackend internal plant
+```
+
+The adapter preserves the existing observation/action contract, checkpoint
+compatibility, deterministic resets, and vectorized throughput. Chrono imports
+remain inside `chrono_interface/`; application code depends on the AVLite
+bridge contract.
+
+## Execution Modes
+
+```text
+aa stack       complete AVLite SyncExecuter application
+aa train       vectorized Gym application over AVLite WorldBridge
+aa eval/watch  deterministic Gym application over AVLite WorldBridge
+```
+
+ROS is still absent from the training loop. A future ROS implementation is a
+different `WorldBridge`, selected by an AVLite profile without changing the
+planner, controller, or task contracts.
+
+## Vehicle And Track Domains
+
+`vehicle/` owns A2RL-style dynamics, tires, aero, braking, actuators, and
+telemetry. `track/` owns TUMFTM parsing, Frenet geometry, speed profiles, and
+semantic curbs. These are domain libraries used by AVLite strategies, not
+parallel orchestration frameworks.
+
+The public-reference A2RL EAV24/EAV25 parameters remain estimates where public
+data is unavailable. AVLite changes software composition; it does not make
+those estimates authoritative.

@@ -1,0 +1,12 @@
+format: AVLite GlobalPlan and RaceMap
+avlite_api_target: 0.5.3
+source_experiment: configs/experiments/rl_planner_yas_marina.yaml
+source_track: TUMFTM/racetrack-database YasMarina
+source_metadata: tracks/yas_marina/processed/yas_marina_metadata.yaml
+track_length_m: 5546.5695165063935
+reference_points: 1110
+speed_profile_min_kmh: 71.73377306626534
+speed_profile_max_kmh: 299.99999999988
+files:
+  global_plan: yas_marina_a2rl_global_plan.json
+  race_map: yas_marina_a2rl.map.json

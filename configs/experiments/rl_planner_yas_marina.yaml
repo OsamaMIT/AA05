@@ -1,5 +1,7 @@
 name: rl_longitudinal_yas_marina
 description: PPO pedal-residual policy above profile speed PID while lateral control follows the TUMFTM raceline.
+avlite:
+  enabled: true
 component_configs:
   vehicle: configs/vehicle/a2rl_style_sf23.yaml
   track: configs/track/yas_marina.yaml

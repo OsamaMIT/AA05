@@ -5,15 +5,16 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "chrono-a2rl-training"
 version = "0.1.0"
-description = "A modular A2RL-style autonomous racing training stack using Project Chrono, MPC, and Gymnasium."
+description = "An AVLite-native A2RL-style racing stack using Project Chrono, MPC, Gymnasium, and SB3."
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-  "numpy>=1.24",
-  "scipy>=1.10",
+  "avlite>=0.5.3,<0.6",
+  "numpy>=2.0",
+  "scipy>=1.11",
   "pandas>=2.0",
   "pyyaml>=6.0",
-  "matplotlib>=3.7",
+  "matplotlib>=3.8",
   "pillow>=10.0",
   "gymnasium>=0.29",
   "osqp>=1.0",
@@ -28,6 +29,13 @@ aa = "chrono_a2rl.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+avlite_a2rl = ["README.md", "requirements.txt"]
+
+[tool.setuptools.data-files]
+"share/chrono_a2rl/avlite_profiles" = ["avlite_profiles/*.yaml"]
+"share/chrono_a2rl/avlite_data" = ["avlite_data/*.json", "avlite_data/*.yaml"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

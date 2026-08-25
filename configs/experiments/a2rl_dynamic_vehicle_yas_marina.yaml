@@ -1,4 +1,6 @@
 name: a2rl_dynamic_vehicle_yas_marina
+avlite:
+  enabled: true
 description: Existing raceline and speed-profile controller on the Level 2 EAV24 approximation.
 component_configs:
   vehicle: configs/vehicle/a2rl_style_eav24.yaml

@@ -1,4 +1,6 @@
 name: rl_speed_policy_yas_marina
+avlite:
+  enabled: true
 description: PPO high-level speed scaling policy above the MPC baseline.
 component_configs:
   vehicle: configs/vehicle/a2rl_style_sf23.yaml

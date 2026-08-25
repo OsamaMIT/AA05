@@ -11,12 +11,19 @@ from chrono_a2rl.rl.train import main_planner, main_speed
 from chrono_a2rl.rl.visualize_policy import main as watch_main
 
 
+def _stack_main(args: list[str] | None = None) -> None:
+    from chrono_a2rl.avlite_stack.runtime import main
+
+    main(args)
+
+
 _COMMANDS: dict[str, tuple[str, Callable[[list[str] | None], None]]] = {
     "train": ("Train the bounded profile-speed pedal residual.", main_planner),
     "eval": ("Evaluate a saved policy and write metrics.", eval_main),
     "watch": ("Watch a saved policy in a live graphical view.", watch_main),
     "optimize": ("Find a faster repeatable PID speed profile.", optimize_main),
     "train-speed": ("Train the older speed-only policy.", main_speed),
+    "stack": ("Run or inspect the canonical AVLite racing stack.", _stack_main),
 }
 
 
@@ -64,6 +71,9 @@ def _print_help(*, file=None) -> None:
     print("  aa watch --model latest", file=stream)
     print("  aa watch --camera follow --zoom-radius 120", file=stream)
     print("  aa optimize --backend chrono --iterations 8", file=stream)
+    print("  aa stack --validate --backend mock", file=stream)
+    print("  aa stack --backend chrono", file=stream)
+    print("  aa stack --ui", file=stream)
 
 
 def _dispatch_help(args: list[str]) -> None:

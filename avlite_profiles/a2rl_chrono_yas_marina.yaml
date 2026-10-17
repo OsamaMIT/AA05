@@ -121,13 +121,13 @@ c40_execution:
   c40_execution_tasks:
   - A2RLLapTelemetryTask
   c40_global_planner: A2RLGlobalRacePlanner
-  c40_global_trajectory: ~/Documents/RL/AA05/avlite_data/yas_marina_a2rl_global_plan.json
+  c40_global_trajectory: yas_marina_a2rl_global_plan.json
   c40_local_planner: A2RLReferenceLocalPlanner
   c40_localization: ''
   c40_localization_dt: 0.02
   c40_log_level: INFO
   c40_log_to_file: false
-  c40_map: ~/Documents/RL/AA05/avlite_data/yas_marina_a2rl.map.json
+  c40_map: yas_marina_a2rl.map.json
   c40_mapping: MapReader
   c40_pace_control: true
   c40_pace_perception: true

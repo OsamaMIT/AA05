@@ -1,0 +1,21 @@
+name: community_mpc_yas_marina
+description: Standalone AVLite Tube MPC with speed PID on the Yas Marina raceline.
+component_configs:
+  vehicle: configs/vehicle/a2rl_style_sf23.yaml
+  track: configs/track/yas_marina.yaml
+  controller:
+    lateral: configs/controller/mpc_lateral_full_tube.yaml
+    speed: configs/controller/speed_pid.yaml
+  simulation: configs/simulation/chrono_default.yaml
+simulation:
+  control_dt: 0.02
+  initial_speed: 12.0
+  max_abs_yaw_rate: 4.5
+track:
+  fallback:
+    enabled: false
+speed_profile:
+  min_speed: 5.0
+  max_speed: 15.0
+  max_lateral_accel: 3.5
+  smoothing_window: 1

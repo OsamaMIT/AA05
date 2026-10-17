@@ -20,6 +20,10 @@ synthetic oval is now only a fallback if those processed files are removed.
 
 ## AVLite Stack
 
+For a standalone community **Tube MPC** plugin (without the training package),
+run `python scripts/build_community_plugin.py`. The generated directory and ZIP
+are written to `dist/`. See [installation and architecture](docs/COMMUNITY_MPC_PLUGIN.md).
+
 The [`avlite_a2rl` community plugin](src/avlite_a2rl) follows AVLite's standard
 plugin model and registers five repository strategies:
 
